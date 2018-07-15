@@ -1,0 +1,14 @@
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+dependencies {
+    implementation project(':RoomigrantLib')
+
+    implementation 'com.squareup:kotlinpoet:0.7.0'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'android.arch.persistence.room:runtime:1.1.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
