@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "bc0fa74c1813d4ced25801545540915a",
+    "identityHash": "d51066cdc9a5e865378f2c5cb2f61699",
     "entities": [
       {
         "tableName": "Object1Dbo",
@@ -47,11 +47,31 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "Object2Dbo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"bc0fa74c1813d4ced25801545540915a\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"d51066cdc9a5e865378f2c5cb2f61699\")"
     ]
   }
 }

@@ -7,8 +7,9 @@ import dev.matrix.roomigrant.GenerateRoomMigrations
 /**
  * @author matrixdev
  */
-@Database(version = 5, entities = [Object1Dbo::class])
+@Database(version = 5, entities = [Object1Dbo::class, Object2Dbo::class])
 @GenerateRoomMigrations(Rules::class)
 abstract class Database : RoomDatabase() {
 	abstract val object1Dao: Object1Dao
+	abstract val object2Dao: Object2Dao
 }
