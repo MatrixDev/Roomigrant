@@ -18,6 +18,6 @@ class Object1Dbo {
 
 	var nullIntVal: Int? = 0
 
-	var nullStringVal: String? = ""
+	var nullStringVal: String = ""
 
 }
