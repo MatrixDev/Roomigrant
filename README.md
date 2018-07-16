@@ -1,5 +1,8 @@
 # Roomigrant
 
+[![Release](https://jitpack.io/v/MatrixDev/Roomigrant.svg)]
+(https://jitpack.io/#MatrixDev/Roomigrant)
+
 Roomigrant is a helper library to automatically generate Android Room library migrations using compile-time code generation.
 
 # Add to your project
@@ -112,7 +115,6 @@ Returned value will be injected as-is to final SQL statement when copying/updati
  - Add table and column names escaping
  - Add foreign key support (currently they are completely ignored)
  - Add OnMigrationStart and OnMigrationEnd annotated callbacks
- - Add to Maven Central (if anyone will use this library at all)
  - Some internal optimizations
 
 # License
