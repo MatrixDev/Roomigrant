@@ -11,6 +11,9 @@ class FieldDiff(val table1: Table, val table2: Table, val field1: Field, val fie
 	val affinityChanged = field1.affinity != field2.affinity
 	val nullabilityChanged = !field1.notNull && field2.notNull
 
+	val copySql: String
+		get() = "`${table1.name}`.`${field1.name}`"
+
 	val castSql: String
 		get() = "CAST(`${table1.name}`.`${field1.name}` AS ${field2.affinity})"
 

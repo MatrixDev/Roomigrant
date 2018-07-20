@@ -88,7 +88,7 @@ class Migration(
 				val fields = LinkedHashMap<String, String>()
 				for (it in tableDiff.fieldsDiff.same) {
 					val rule = getFieldRule(table2, it.field2)
-					fields[it.field2.name] = rule?.invokeCodeWrapped ?: it.field2.defaultSqlValue
+					fields[it.field2.name] = rule?.invokeCodeWrapped ?: it.copySql
 				}
 				for (it in tableDiff.fieldsDiff.added) {
 					val rule = getFieldRule(table2, it)
