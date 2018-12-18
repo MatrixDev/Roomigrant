@@ -61,19 +61,15 @@ class Rules(private val database: Database, element: TypeElement) {
 	}
 
 	fun getFieldRule(version1: Int, version2: Int, table: String, field: String): FieldRule? {
-		return fieldRules[table]?.get(field)?.findByVersion(version1, version2)
+		return fieldRules[table]?.get(field)?.find { it.checkVersion(version1, version2)  }
 	}
 
-	fun getOnEndRule(version1: Int, version2: Int): InvokeRule? {
-		return onEndRules.findByVersion(version1, version2)
+	fun getOnEndRules(version1: Int, version2: Int): Sequence<InvokeRule> {
+		return onEndRules.asSequence().filter { it.checkVersion(version1, version2) }
 	}
 
-	fun getOnStartRule(version1: Int, version2: Int): InvokeRule? {
-		return onStartRules.findByVersion(version1, version2)
-	}
-
-	private fun <T : RuleByVersion> Iterable<T>.findByVersion(version1: Int, version2: Int): T? {
-		return find { (it.version1 == -1 || it.version1 == version1) && (it.version2 == -1 || it.version2 == version2) }
+	fun getOnStartRules(version1: Int, version2: Int): Sequence<InvokeRule> {
+		return onStartRules.asSequence().filter { it.checkVersion(version1, version2) }
 	}
 
 }

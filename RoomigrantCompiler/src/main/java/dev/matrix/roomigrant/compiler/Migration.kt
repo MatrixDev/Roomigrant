@@ -34,13 +34,13 @@ class Migration(
 		funcSpecBuilder.addModifiers(KModifier.OVERRIDE)
 		funcSpecBuilder.addParameter(databaseArgName, state.sqLiteDatabaseType)
 
-		state.rules.getOnStartRule(scheme1.version, scheme2.version)?.also {
+		state.rules.getOnStartRules(scheme1.version, scheme2.version).forEach {
 			funcSpecBuilder.addStatement("%L", it.getInvokeCode(databaseArgName, scheme1.version, scheme2.version))
 		}
 
 		migrate()
 
-		state.rules.getOnEndRule(scheme1.version, scheme2.version)?.also {
+		state.rules.getOnEndRules(scheme1.version, scheme2.version).forEach {
 			funcSpecBuilder.addStatement("%L", it.getInvokeCode(databaseArgName, scheme1.version, scheme2.version))
 		}
 

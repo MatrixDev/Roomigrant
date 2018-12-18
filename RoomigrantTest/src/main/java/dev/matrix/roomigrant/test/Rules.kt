@@ -27,8 +27,20 @@ class Rules {
 		assert(cursor.count == 1)
 	}
 
+	@OnMigrationStartRule(version1 = 1)
+	fun migrate_1_n_before(db: SupportSQLiteDatabase, version1: Int, version2: Int) {
+		val cursor = db.query("pragma table_info(Object1Dbo)")
+		assert(cursor.count == 1)
+	}
+
 	@OnMigrationEndRule(version1 = 1, version2 = 2)
 	fun migrate_1_2_after(db: SupportSQLiteDatabase, version1: Int, version2: Int) {
+		val cursor = db.query("pragma table_info(Object1Dbo)")
+		assert(cursor.count == 3)
+	}
+
+	@OnMigrationEndRule(version2 = 2)
+	fun migrate_n_2_after(db: SupportSQLiteDatabase, version1: Int, version2: Int) {
 		val cursor = db.query("pragma table_info(Object1Dbo)")
 		assert(cursor.count == 3)
 	}
