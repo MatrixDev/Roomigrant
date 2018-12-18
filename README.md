@@ -112,14 +112,14 @@ Returned value will be injected as-is to final SQL statement when copying/updati
 Custom code can also be invoked before and after each migration:
 
 ```kotlin
-@BeforeMigrationRule(version1 = 1, version2 = 2)
-fun migrate_1_2_before(db: SupportSQLiteDatabase) {
+@OnMigrationStartRule(version1 = 1, version2 = 2)
+fun migrate_1_2_before(db: SupportSQLiteDatabase, version1: Int, version2: Int) {
 	val cursor = db.query("pragma table_info(Object1Dbo)")
 	assert(cursor.count == 1)
 }
 
-@AfterMigrationRule(version1 = 1, version2 = 2)
-fun migrate_1_2_after(db: SupportSQLiteDatabase) {
+@OnMigrationEndRule(version1 = 1, version2 = 2)
+fun migrate_1_2_after(db: SupportSQLiteDatabase, version1: Int, version2: Int) {
 	val cursor = db.query("pragma table_info(Object1Dbo)")
 	assert(cursor.count == 3)
 }
