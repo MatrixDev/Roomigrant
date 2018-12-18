@@ -109,11 +109,26 @@ fun migrate_3_4_Object1Dbo_intVal(): String {
 
 Returned value will be injected as-is to final SQL statement when copying/updating that field.
 
+Custom code can also be invoked before and after each migration:
+
+```kotlin
+@BeforeMigrationRule(version1 = 1, version2 = 2)
+fun migrate_1_2_before(db: SupportSQLiteDatabase) {
+	val cursor = db.query("pragma table_info(Object1Dbo)")
+	assert(cursor.count == 1)
+}
+
+@AfterMigrationRule(version1 = 1, version2 = 2)
+fun migrate_1_2_after(db: SupportSQLiteDatabase) {
+	val cursor = db.query("pragma table_info(Object1Dbo)")
+	assert(cursor.count == 3)
+}
+```
+
 # Todos
 
  - Add table and column names escaping
  - Add foreign key support (currently they are completely ignored)
- - Add OnMigrationStart and OnMigrationEnd annotated callbacks
  - Some internal optimizations
 
 # License
