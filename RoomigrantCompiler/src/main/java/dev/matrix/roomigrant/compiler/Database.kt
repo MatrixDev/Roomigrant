@@ -1,12 +1,12 @@
 package dev.matrix.roomigrant.compiler
 
 import com.squareup.kotlinpoet.*
+import dev.matrix.roomigrant.AfterMigrationRule
+import dev.matrix.roomigrant.BeforeMigrationRule
 import dev.matrix.roomigrant.FieldMigrationRule
 import dev.matrix.roomigrant.GenerateRoomMigrations
 import dev.matrix.roomigrant.compiler.data.Scheme
-import dev.matrix.roomigrant.compiler.rules.FieldRule
-import dev.matrix.roomigrant.compiler.rules.FieldRules
-import dev.matrix.roomigrant.compiler.rules.RulesHolder
+import dev.matrix.roomigrant.compiler.rules.*
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
@@ -17,7 +17,7 @@ import javax.tools.StandardLocation
 /**
  * @author matrixdev
  */
-@Suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST", "MemberVisibilityCanBePrivate")
 class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 
 	val migrationType = ClassName("android.arch.persistence.room.migration", "Migration")
@@ -29,8 +29,8 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 	val elementClassName = element.asClassName().simpleName()
 	val migrationListClassName = ClassName(packageName, "${elementClassName}_Migrations")
 
+	val rules = Rules()
 	val migrations = ArrayList<Migration>()
-	val fieldRules = FieldRules()
 	val rulesHolderList = ArrayList<RulesHolder>()
 
 	init {
@@ -48,7 +48,17 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 
 					method.getAnnotation(FieldMigrationRule::class.java)?.also {
 						val rule = FieldRule(this, holder, method.simpleName.toString())
-						fieldRules.put(it.version1, it.version2, it.table, it.field, rule)
+						rules.putFieldRule(it.version1, it.version2, it.table, it.field, rule)
+					}
+
+					method.getAnnotation(BeforeMigrationRule::class.java)?.also {
+						val rule = LifecycleRule(this, holder, method.simpleName.toString())
+						rules.putBeforeRule(it.version1, it.version2, rule)
+					}
+
+					method.getAnnotation(AfterMigrationRule::class.java)?.also {
+						val rule = LifecycleRule(this, holder, method.simpleName.toString())
+						rules.putAfterRule(it.version1, it.version2, rule)
 					}
 				}
 

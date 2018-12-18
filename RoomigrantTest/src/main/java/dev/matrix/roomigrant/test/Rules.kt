@@ -1,10 +1,14 @@
 package dev.matrix.roomigrant.test
 
+import android.arch.persistence.db.SupportSQLiteDatabase
+import dev.matrix.roomigrant.AfterMigrationRule
+import dev.matrix.roomigrant.BeforeMigrationRule
 import dev.matrix.roomigrant.FieldMigrationRule
 
 /**
  * @author matrixdev
  */
+@Suppress("FunctionName")
 class Rules {
 
 	@FieldMigrationRule(version1 = 3, version2 = 4, table = "Object1Dbo", field = "intValRenamed")
@@ -17,4 +21,15 @@ class Rules {
 		return "`Object1Dbo`.`stringVal`"
 	}
 
+	@BeforeMigrationRule(version1 = 1, version2 = 2)
+	fun migrate_1_2_before(db: SupportSQLiteDatabase) {
+		val cursor = db.query("pragma table_info(Object1Dbo)")
+		assert(cursor.count == 1)
+	}
+
+	@AfterMigrationRule(version1 = 1, version2 = 2)
+	fun migrate_1_2_after(db: SupportSQLiteDatabase) {
+		val cursor = db.query("pragma table_info(Object1Dbo)")
+		assert(cursor.count == 3)
+	}
 }

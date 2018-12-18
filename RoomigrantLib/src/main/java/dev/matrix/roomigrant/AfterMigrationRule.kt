@@ -5,8 +5,6 @@ package dev.matrix.roomigrant
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)
-annotation class FieldMigrationRule(
+annotation class AfterMigrationRule(
 		val version1: Int,
-		val version2: Int,
-		val table: String,
-		val field: String)
+		val version2: Int)

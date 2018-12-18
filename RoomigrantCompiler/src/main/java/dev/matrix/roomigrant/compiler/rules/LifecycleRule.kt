@@ -6,12 +6,11 @@ import com.squareup.kotlinpoet.CodeBlock
 /**
  * @author matrixdev
  */
-data class FieldRule(
+data class LifecycleRule(
 		val state: Database,
 		val holder: RulesHolder,
 		val methodName: String) {
 
-	val invokeCode = CodeBlock.of("%T.%L.%L()", state.migrationListClassName, holder.name, methodName)
-	val inStringTemplate = "\${$invokeCode}"
+	fun getInvokeCode(databaseArgName: String) = CodeBlock.of("%T.%L.%L($databaseArgName)\n", state.migrationListClassName, holder.name, methodName)
 
 }

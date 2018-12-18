@@ -34,7 +34,15 @@ class Migration(
 		funcSpecBuilder.addModifiers(KModifier.OVERRIDE)
 		funcSpecBuilder.addParameter(databaseArgName, state.sqLiteDatabaseType)
 
+		state.rules.getBeforeRule(scheme1.version, scheme2.version)?.also {
+			funcSpecBuilder.addCode(it.getInvokeCode(databaseArgName))
+		}
+
 		migrate()
+
+		state.rules.getAfterRule(scheme1.version, scheme2.version)?.also {
+			funcSpecBuilder.addCode(it.getInvokeCode(databaseArgName))
+		}
 
 		typeSpec = TypeSpec.objectBuilder(className)
 				.superclass(state.migrationType)
@@ -88,19 +96,19 @@ class Migration(
 				val fields = LinkedHashMap<String, String>()
 				for (it in tableDiff.fieldsDiff.same) {
 					val rule = getFieldRule(table2, it.field2)
-					fields[it.field2.name] = rule?.invokeCodeWrapped ?: it.copySql
+					fields[it.field2.name] = rule?.inStringTemplate ?: it.copySql
 				}
 				for (it in tableDiff.fieldsDiff.added) {
 					val rule = getFieldRule(table2, it)
-					fields[it.name] = rule?.invokeCodeWrapped ?: it.defaultSqlValue
+					fields[it.name] = rule?.inStringTemplate ?: it.defaultSqlValue
 				}
 				for (it in tableDiff.fieldsDiff.affinityChanged) {
 					val rule = getFieldRule(table2, it.field2)
-					fields[it.field2.name] = rule?.invokeCodeWrapped ?: it.castSql
+					fields[it.field2.name] = rule?.inStringTemplate ?: it.castSql
 				}
 				for (it in tableDiff.fieldsDiff.nullabilityChanged) {
 					val rule = getFieldRule(table2, it.field2)
-					fields[it.field2.name] = rule?.invokeCodeWrapped ?: it.toNotNullableSql
+					fields[it.field2.name] = rule?.inStringTemplate ?: it.toNotNullableSql
 				}
 
 				val sb = StringBuilder()
@@ -138,7 +146,7 @@ class Migration(
 	}
 
 	private fun getFieldRule(table: Table, field: Field): FieldRule? {
-		return state.fieldRules.get(scheme1.version, scheme2.version, table.name, field.name)
+		return state.rules.getFieldRule(scheme1.version, scheme2.version, table.name, field.name)
 	}
 
 	private fun execSql(query: String) {
