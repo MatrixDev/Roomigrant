@@ -1,4 +1,4 @@
-package dev.matrix.roomigrant
+package dev.matrix.roomigrant.rules
 
 /**
  * @author matrixdev

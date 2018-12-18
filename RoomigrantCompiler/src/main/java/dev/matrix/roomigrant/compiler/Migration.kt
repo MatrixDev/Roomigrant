@@ -34,14 +34,14 @@ class Migration(
 		funcSpecBuilder.addModifiers(KModifier.OVERRIDE)
 		funcSpecBuilder.addParameter(databaseArgName, state.sqLiteDatabaseType)
 
-		state.rules.getBeforeRule(scheme1.version, scheme2.version)?.also {
-			funcSpecBuilder.addCode(it.getInvokeCode(databaseArgName))
+		state.rules.getOnStartRule(scheme1.version, scheme2.version)?.also {
+			funcSpecBuilder.addStatement("%L", it.getInvokeCode(databaseArgName, scheme1.version, scheme2.version))
 		}
 
 		migrate()
 
-		state.rules.getAfterRule(scheme1.version, scheme2.version)?.also {
-			funcSpecBuilder.addCode(it.getInvokeCode(databaseArgName))
+		state.rules.getOnEndRule(scheme1.version, scheme2.version)?.also {
+			funcSpecBuilder.addStatement("%L", it.getInvokeCode(databaseArgName, scheme1.version, scheme2.version))
 		}
 
 		typeSpec = TypeSpec.objectBuilder(className)
@@ -64,6 +64,7 @@ class Migration(
 	}
 
 	private fun migrate() {
+		var variableIndex = 0
 		val diff = SchemeDiff(scheme1, scheme2)
 
 		for (tableDiff in diff.added) {
@@ -93,22 +94,27 @@ class Migration(
 				val tableMerge = Table(table2, table2.name + mergeTableSuffix)
 				createTable(tableMerge)
 
+				fun toSql(rule: FieldRule?, fallback: String): String {
+					if (rule == null) {
+						return fallback
+					}
+					val name = "var${++variableIndex}"
+					funcSpecBuilder.addStatement("val %L = %L", name, rule.invokeCode)
+					return "\$$name"
+				}
+
 				val fields = LinkedHashMap<String, String>()
 				for (it in tableDiff.fieldsDiff.same) {
-					val rule = getFieldRule(table2, it.field2)
-					fields[it.field2.name] = rule?.inStringTemplate ?: it.copySql
+					fields[it.field2.name] = toSql(getFieldRule(table2, it.field2), it.copySql)
 				}
 				for (it in tableDiff.fieldsDiff.added) {
-					val rule = getFieldRule(table2, it)
-					fields[it.name] = rule?.inStringTemplate ?: it.defaultSqlValue
+					fields[it.name] = toSql(getFieldRule(table2, it), it.defaultSqlValue)
 				}
 				for (it in tableDiff.fieldsDiff.affinityChanged) {
-					val rule = getFieldRule(table2, it.field2)
-					fields[it.field2.name] = rule?.inStringTemplate ?: it.castSql
+					fields[it.field2.name] = toSql(getFieldRule(table2, it.field2), it.castSql)
 				}
 				for (it in tableDiff.fieldsDiff.nullabilityChanged) {
-					val rule = getFieldRule(table2, it.field2)
-					fields[it.field2.name] = rule?.inStringTemplate ?: it.toNotNullableSql
+					fields[it.field2.name] = toSql(getFieldRule(table2, it.field2), it.toNotNullableSql)
 				}
 
 				val sb = StringBuilder()

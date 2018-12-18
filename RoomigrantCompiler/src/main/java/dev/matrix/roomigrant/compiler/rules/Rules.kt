@@ -1,42 +1,79 @@
 package dev.matrix.roomigrant.compiler.rules
 
+import com.squareup.kotlinpoet.asTypeName
+import dev.matrix.roomigrant.rules.FieldMigrationRule
+import dev.matrix.roomigrant.GenerateRoomMigrations
+import dev.matrix.roomigrant.compiler.Database
+import dev.matrix.roomigrant.rules.OnMigrationEndRule
+import dev.matrix.roomigrant.rules.OnMigrationStartRule
+import javax.lang.model.element.ElementKind
+import javax.lang.model.element.TypeElement
+import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.MirroredTypesException
+
 /**
  * @author matrixdev
  */
-class Rules {
+class Rules(private val database: Database, element: TypeElement) {
 
-	private val fieldRules = HashMap<String, FieldRule>()
-	private val beforeRules = HashMap<String, LifecycleRule>()
-	private val afterRules = HashMap<String, LifecycleRule>()
+	private val providers = ArrayList<RulesProviderField>()
+	private val onEndRules = ArrayList<InvokeRule>()
+	private val onStartRules = ArrayList<InvokeRule>()
+	private val fieldRules = HashMap<String, HashMap<String, ArrayList<FieldRule>>>()
+
+	init {
+		try {
+			// TODO handle properly without exception
+			element.getAnnotation(GenerateRoomMigrations::class.java).rules[0]
+			throw NotImplementedError("MirroredTypesException was not thrown")
+		} catch (e: MirroredTypesException) {
+			e.typeMirrors.asSequence().filterIsInstance<DeclaredType>().forEach { parseRulesClass(it) }
+		}
+	}
+
+	private fun parseRulesClass(rulesClass: DeclaredType) {
+		val field = RulesProviderField(database, name = "rule" + providers.size, type = rulesClass.asTypeName())
+
+		for (method in rulesClass.asElement().enclosedElements) {
+			if (method.kind != ElementKind.METHOD) {
+				continue
+			}
+
+			method.getAnnotation(FieldMigrationRule::class.java)?.also {
+				fieldRules.getOrPut(it.table) { HashMap() }.getOrPut(it.field) { ArrayList() }
+						.add(FieldRule(it.version1, it.version2, field, method.simpleName.toString()))
+			}
+
+			method.getAnnotation(OnMigrationEndRule::class.java)?.also {
+				onEndRules.add(InvokeRule(it.version1, it.version2, field, method.simpleName.toString()))
+			}
+
+			method.getAnnotation(OnMigrationStartRule::class.java)?.also {
+				onStartRules.add(InvokeRule(it.version1, it.version2, field, method.simpleName.toString()))
+			}
+		}
+
+		providers.add(field)
+	}
+
+	fun getProvidersFields(): List<RulesProviderField> {
+		return providers
+	}
 
 	fun getFieldRule(version1: Int, version2: Int, table: String, field: String): FieldRule? {
-		return fieldRules[packFieldRuleKey(version1, version2, table, field)]
+		return fieldRules[table]?.get(field)?.findByVersion(version1, version2)
 	}
 
-	fun putFieldRule(version1: Int, version2: Int, table: String, field: String, rule: FieldRule) {
-		fieldRules[packFieldRuleKey(version1, version2, table, field)] = rule
+	fun getOnEndRule(version1: Int, version2: Int): InvokeRule? {
+		return onEndRules.findByVersion(version1, version2)
 	}
 
-	fun getBeforeRule(version1: Int, version2: Int): LifecycleRule? {
-		return beforeRules[packLifecycleRuleKey(version1, version2)]
+	fun getOnStartRule(version1: Int, version2: Int): InvokeRule? {
+		return onStartRules.findByVersion(version1, version2)
 	}
 
-	fun putBeforeRule(version1: Int, version2: Int, rule: LifecycleRule) {
-		beforeRules[packLifecycleRuleKey(version1, version2)] = rule
+	private fun <T : RuleByVersion> Iterable<T>.findByVersion(version1: Int, version2: Int): T? {
+		return find { (it.version1 == -1 || it.version1 == version1) && (it.version2 == -1 || it.version2 == version2) }
 	}
-
-	fun getAfterRule(version1: Int, version2: Int): LifecycleRule? {
-		return afterRules[packLifecycleRuleKey(version1, version2)]
-	}
-
-	fun putAfterRule(version1: Int, version2: Int, rule: LifecycleRule) {
-		afterRules[packLifecycleRuleKey(version1, version2)] = rule
-	}
-
-	private fun packLifecycleRuleKey(version1: Int, version2: Int) =
-			"$version1-$version2"
-
-	private fun packFieldRuleKey(version1: Int, version2: Int, table: String, field: String) =
-			"$version1-$version2-$table-$field"
 
 }

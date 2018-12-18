@@ -5,11 +5,12 @@ import com.squareup.kotlinpoet.CodeBlock
 /**
  * @author matrixdev
  */
-data class FieldRule(
+data class InvokeRule(
 		override val version1: Int,
 		override val version2: Int,
 		val field: RulesProviderField,
 		val methodName: String) : RuleByVersion {
 
-	val invokeCode = CodeBlock.of("%T.%L.%L()", field.database.migrationListClassName, field.name, methodName)
+	fun getInvokeCode(databaseArgName: String, version1: Int, version2: Int) =
+			CodeBlock.of("%T.%L.%L($databaseArgName, $version1, $version2)", field.database.migrationListClassName, field.name, methodName)
 }
