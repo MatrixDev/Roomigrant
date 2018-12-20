@@ -58,9 +58,7 @@ class Migration(
 	fun generate() {
 		state.environment.filer.createResource(StandardLocation.SOURCE_OUTPUT, state.packageName, "${className.simpleName()}.kt")
 				.openWriter()
-				.use {
-					fileSpec.writeTo(it)
-				}
+				.use { fileSpec.writeTo(it) }
 	}
 
 	private fun migrate() {
@@ -168,7 +166,7 @@ class Migration(
 	}
 
 	private fun createTable(table: Table) {
-		execSql(table.createSql.replace("\${TABLE_NAME}", table.name))
+		execSql(table.createSql(table.name))
 	}
 
 	private fun dropTableIndex(index: Index) {
@@ -180,6 +178,6 @@ class Migration(
 	}
 
 	private fun createTableIndex(table: Table, index: Index) {
-		execSql(index.createSql.replace("\${TABLE_NAME}", table.name))
+		execSql(index.createSql(table.name))
 	}
 }

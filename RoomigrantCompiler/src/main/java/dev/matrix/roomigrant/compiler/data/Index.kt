@@ -13,7 +13,11 @@ data class Index(
 		val unique: Boolean,
 
 		@SerializedName("createSql")
-		val createSql: String,
+		val createSqlTemplate: String,
 
 		@SerializedName("columnNames")
-		val columns: List<String>)
+		val columns: List<String>) {
+
+	fun createSql(tableName: String) = createSqlTemplate.replace("\${TABLE_NAME}", tableName)
+
+}

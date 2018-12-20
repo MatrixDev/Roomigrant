@@ -39,6 +39,9 @@ class Processor : AbstractProcessor() {
 		val schemes = folder.listFiles().mapNotNull { readScheme(it) }.sortedBy { it.version }
 
 		val database = Database(processingEnv, element)
+		for (scheme in schemes) {
+			database.addScheme(scheme)
+		}
 		for (index in 1 until schemes.size) {
 			database.addMigration(schemes[index - 1], schemes[index]).generate()
 		}

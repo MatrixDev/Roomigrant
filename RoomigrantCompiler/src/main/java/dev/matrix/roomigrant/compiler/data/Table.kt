@@ -10,7 +10,7 @@ data class Table(
 		val name: String,
 
 		@SerializedName("createSql")
-		val createSql: String,
+		val createSqlTemplate: String,
 
 		@SerializedName("primaryKey")
 		val primaryKey: PrimaryKey,
@@ -22,10 +22,11 @@ data class Table(
 		val indices: List<Index>) {
 
 	val fieldsMap by lazy { fields.associateBy { it.name } }
+	fun createSql(tableName: String = name) = createSqlTemplate.replace("\${TABLE_NAME}", tableName)
 
 	constructor(table: Table, name: String) : this(
 			name = name,
-			createSql = table.createSql,
+			createSqlTemplate = table.createSqlTemplate,
 			primaryKey = table.primaryKey,
 			fields = table.fields,
 			indices = table.indices)
