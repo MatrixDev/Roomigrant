@@ -72,28 +72,35 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 				.returns(ParameterizedTypeName.get(Map::class, Int::class, SchemeInfo::class))
 
 		var varIndex = 0
-		fun generateVarName() = "var${++varIndex}"
 
-		val schemesVar = generateVarName()
+		val schemesVar = "schemes"
 		val schemesType = ParameterizedTypeName.get(HashMap::class, Int::class, SchemeInfo::class)
 		code.addStatement("val %L = %T()", schemesVar, schemesType)
 
-		for (scheme in schemes) {
-			val tablesVar = generateVarName()
-			val tablesType = ParameterizedTypeName.get(HashMap::class, String::class, TableInfo::class)
-			code.addStatement("val %L = %T()", tablesVar, tablesType)
+		val schemeVar = "scheme"
+		val schemeType = SchemeInfo::class
+		code.addStatement("var %L: %T", schemeVar, schemeType)
 
-			val schemeVar = generateVarName()
-			code.addStatement("val %L = %T(%L, %L)", schemeVar, SchemeInfo::class, scheme.version, tablesVar)
+		val tablesVar = "tables"
+		val tablesType = ParameterizedTypeName.get(HashMap::class, String::class, TableInfo::class)
+		code.addStatement("var %L: %T", tablesVar, tablesType)
+
+		val tableVar = "table"
+		val tableType = TableInfo::class
+		code.addStatement("var %L: %T", tableVar, tableType)
+
+		val indicesVar = "indices"
+		val indicesType = ParameterizedTypeName.get(HashMap::class, String::class, IndexInfo::class)
+		code.addStatement("var %L: %T", indicesVar, indicesType)
+
+		for (scheme in schemes) {
+			code.addStatement("%L = %T()", tablesVar, tablesType)
+			code.addStatement("%L = %T(%L, %L)", schemeVar, SchemeInfo::class, scheme.version, tablesVar)
 			code.addStatement("%L.put(%L, %L)", schemesVar, scheme.version, schemeVar)
 
 			for (table in scheme.tables) {
-				val indicesVar = generateVarName()
-				val indicesType = ParameterizedTypeName.get(HashMap::class, String::class, IndexInfo::class)
-				code.addStatement("val %L = %T()", indicesVar, indicesType)
-
-				val tableVar = generateVarName()
-				code.addStatement("val %L = %T(%L, %S, %S, %L)", tableVar, TableInfo::class, schemeVar, table.name, table.createSql(), indicesVar)
+				code.addStatement("%L = %T()", indicesVar, indicesType)
+				code.addStatement("%L = %T(%L, %S, %S, %L)", tableVar, TableInfo::class, schemeVar, table.name, table.createSql(), indicesVar)
 				code.addStatement("%L.put(%S, %L)", tablesVar, table.name, tableVar)
 
 				for (index in table.indices) {
