@@ -132,10 +132,6 @@ class Migration(
 				createTableIndices(table2)
 			}
 
-			tableDiff.indicesDiff.changed.forEach {
-				dropTableIndex(it)
-				createTableIndex(table2, it)
-			}
 			tableDiff.indicesDiff.added.forEach {
 				createTableIndex(table2, it)
 			}
