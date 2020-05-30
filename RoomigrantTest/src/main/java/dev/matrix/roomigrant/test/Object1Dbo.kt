@@ -1,7 +1,8 @@
 package dev.matrix.roomigrant.test
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 /**
  * @author matrixdev
@@ -9,15 +10,18 @@ import android.arch.persistence.room.PrimaryKey
 @Entity
 class Object1Dbo {
 
-	@PrimaryKey
-	var id = ""
+    @PrimaryKey
+    var id = ""
 
-	var intValRenamed = 0
+    var intValRenamed = 0
 
-	var stringValRenamed = ""
+    var stringValRenamed = ""
 
-	var nullIntVal: Int? = 0
+    var nullIntVal: Int? = 0
 
-	var nullStringVal: String = ""
+    var nullStringVal: String = ""
+
+    @ColumnInfo(index = true)
+    var stringValIndexed: String = ""
 
 }

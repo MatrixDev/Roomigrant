@@ -10,8 +10,7 @@ import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
-import android.arch.persistence.room.Database as DatabaseAnnotation
-
+import androidx.room.Database as DatabaseAnnotation
 /**
  * @author matrixdev
  */
