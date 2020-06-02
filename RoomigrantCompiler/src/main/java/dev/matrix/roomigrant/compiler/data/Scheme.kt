@@ -12,4 +12,7 @@ data class Scheme(
         val version: Int,
 
         @Json(name = "entities")
-        val tables: List<Table>)
+        val tables: List<Table>,
+
+		@Json(name ="views")
+		val views: List<View> = emptyList())

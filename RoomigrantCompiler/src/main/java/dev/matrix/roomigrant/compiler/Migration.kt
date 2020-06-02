@@ -1,10 +1,7 @@
 package dev.matrix.roomigrant.compiler
 
 import com.squareup.kotlinpoet.*
-import dev.matrix.roomigrant.compiler.data.Field
-import dev.matrix.roomigrant.compiler.data.Index
-import dev.matrix.roomigrant.compiler.data.Scheme
-import dev.matrix.roomigrant.compiler.data.Table
+import dev.matrix.roomigrant.compiler.data.*
 import dev.matrix.roomigrant.compiler.diff.SchemeDiff
 import dev.matrix.roomigrant.compiler.rules.FieldRule
 import java.util.*
@@ -65,14 +62,14 @@ class Migration(
         var variableIndex = 0
         val diff = SchemeDiff(scheme1, scheme2)
 
-        for (tableDiff in diff.added) {
-            createTable(tableDiff.table2)
-            createTableIndices(tableDiff.table2)
+        for (tableDiff in diff.addedTables) {
+            createTable(tableDiff.new)
+            createTableIndices(tableDiff.new)
         }
 
-        for (tableDiff in diff.changed) {
-            val table1 = tableDiff.table1
-            val table2 = tableDiff.table2
+        for (tableDiff in diff.changedTables) {
+            val table1 = tableDiff.old
+            val table2 = tableDiff.new
 
             if (!tableDiff.primaryKeyChanged && tableDiff.fieldsDiff.onlyAdded) {
                 val sb = StringBuilder()
@@ -103,16 +100,16 @@ class Migration(
 
                 val fields = LinkedHashMap<String, String>()
                 for (it in tableDiff.fieldsDiff.same) {
-                    fields[it.field2.name] = toSql(getFieldRule(table2, it.field2), it.copySql)
+                    fields[it.newField.name] = toSql(getFieldRule(table2, it.newField), it.copySql)
                 }
                 for (it in tableDiff.fieldsDiff.added) {
                     fields[it.name] = toSql(getFieldRule(table2, it), it.defaultSqlValue)
                 }
                 for (it in tableDiff.fieldsDiff.affinityChanged) {
-                    fields[it.field2.name] = toSql(getFieldRule(table2, it.field2), it.castSql)
+                    fields[it.newField.name] = toSql(getFieldRule(table2, it.newField), it.castSql)
                 }
                 for (it in tableDiff.fieldsDiff.nullabilityChanged) {
-                    fields[it.field2.name] = toSql(getFieldRule(table2, it.field2), it.toNotNullableSql)
+                    fields[it.newField.name] = toSql(getFieldRule(table2, it.newField), it.toNotNullableSql)
                 }
 
                 val sb = StringBuilder()
@@ -139,8 +136,24 @@ class Migration(
             }
         }
 
-        for (table in diff.removed) {
+        for (table in diff.removedTables) {
             dropTable(table.name)
+        }
+
+        for (viewDiff in diff.addedViews) {
+            createView(viewDiff.new)
+        }
+
+        for (viewDiff in diff.changedViews) {
+            val old = viewDiff.old
+            val new = viewDiff.new
+
+            old?.name?.let { dropView(it)}
+            createView(new)
+        }
+
+        for (view in diff.removedViews) {
+            dropView(view.name)
         }
     }
 
@@ -162,6 +175,18 @@ class Migration(
 
     private fun createTable(table: Table) {
         execSql(table.createSql(table.name))
+    }
+
+    private fun dropView(viewName: String) {
+        execSql("DROP VIEW IF EXISTS `$viewName`")
+    }
+
+    private fun renameView(viewName1: String, viewName2: String) {
+        execSql("ALTER VIEW `$viewName1` RENAME TO `$viewName2`")
+    }
+
+    private fun createView(view: View) {
+        execSql(view.createSql(view.name))
     }
 
     private fun dropTableIndex(index: Index) {

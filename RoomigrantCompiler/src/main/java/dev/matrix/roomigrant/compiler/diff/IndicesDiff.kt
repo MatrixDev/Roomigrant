@@ -7,7 +7,7 @@ import dev.matrix.roomigrant.compiler.data.Table
  * @author matrixdev
  */
 @Suppress("CanBeParameter", "MemberVisibilityCanBePrivate")
-class IndicesDiff(val table1: Table?, val table2: Table) {
+class IndicesDiff(val old: Table?, val new: Table) {
 
 	val same = ArrayList<Index>()
 	val added = ArrayList<Index>()
@@ -22,13 +22,13 @@ class IndicesDiff(val table1: Table?, val table2: Table) {
 	}
 
 	fun init() {
-		if (table1 == null) {
-			added.addAll(table2.indices)
+		if (old == null) {
+			added.addAll(new.indices)
 			return
 		}
 
-		val indexes1Map = table1.indices.associateByTo(HashMap()) { it.name }
-		for (index2 in table2.indices) {
+		val indexes1Map = old.indices.associateByTo(HashMap()) { it.name }
+		for (index2 in new.indices) {
 			val index1 = indexes1Map.remove(index2.name)
 			when (index1) {
 				null -> added.add(index2)

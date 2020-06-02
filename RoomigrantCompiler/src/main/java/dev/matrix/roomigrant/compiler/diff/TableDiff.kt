@@ -6,12 +6,13 @@ import dev.matrix.roomigrant.compiler.data.Table
  * @author matrixdev
  */
 @Suppress("CanBeParameter", "MemberVisibilityCanBePrivate")
-class TableDiff(val table1: Table?, val table2: Table) {
-	val fieldsDiff = FieldsDiff(table1, table2)
-	val indicesDiff = IndicesDiff(table1, table2)
-	val nameChanged = table1?.name != table2.name
-	val primaryKeyChanged = table1?.primaryKey != table2.primaryKey
+class TableDiff(val old: Table?, val new: Table) {
+	val fieldsDiff = FieldsDiff(old, new)
+	val indicesDiff = IndicesDiff(old, new)
+	val nameChanged = old?.name != new.name
+	val primaryKeyChanged = old?.primaryKey != new.primaryKey
 
 	val wasChanged: Boolean
 		get() = primaryKeyChanged || nameChanged || fieldsDiff.wasChanged || indicesDiff.wasChanged
 }
+
