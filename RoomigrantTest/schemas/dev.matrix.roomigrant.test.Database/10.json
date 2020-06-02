@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 7,
-    "identityHash": "de427762e78df16b8955744c12f675fb",
+    "version": 10,
+    "identityHash": "77a619dcd14b7b6d0ae1d91133e1e272",
     "entities": [
       {
         "tableName": "Object1Dbo",
@@ -84,10 +84,15 @@
         "foreignKeys": []
       }
     ],
-    "views": [],
+    "views": [
+      {
+        "viewName": "Object1DboView",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT item.id FROM Object1Dbo item"
+      }
+    ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'de427762e78df16b8955744c12f675fb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '77a619dcd14b7b6d0ae1d91133e1e272')"
     ]
   }
 }

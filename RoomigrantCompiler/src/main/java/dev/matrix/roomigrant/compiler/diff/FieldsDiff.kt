@@ -7,7 +7,7 @@ import dev.matrix.roomigrant.compiler.data.Table
  * @author matrixdev
  */
 @Suppress("CanBeParameter", "MemberVisibilityCanBePrivate")
-class FieldsDiff(val table1: Table?, val table2: Table) {
+class FieldsDiff(val old: Table?, val new: Table) {
 
 	val same = ArrayList<FieldDiff>()
 	val added = ArrayList<Field>()
@@ -26,20 +26,20 @@ class FieldsDiff(val table1: Table?, val table2: Table) {
 	}
 
 	fun init() {
-		if (table1 == null) {
-			added.addAll(table2.fields)
+		if (old == null) {
+			added.addAll(new.fields)
 			return
 		}
 
-		val fields1Map = table1.fields.associateByTo(HashMap()) { it.name }
-		for (field2 in table2.fields) {
+		val fields1Map = old.fields.associateByTo(HashMap()) { it.name }
+		for (field2 in new.fields) {
 			val field1 = fields1Map.remove(field2.name)
 			if (field1 == null) {
 				added.add(field2)
 				continue
 			}
 
-			val diff = FieldDiff(table1, table2, field1, field2)
+			val diff = FieldDiff(old, new, field1, field2)
 			when {
 				diff.affinityChanged -> affinityChanged.add(diff)
 				diff.nullabilityChanged -> nullabilityChanged.add(diff)

@@ -21,7 +21,7 @@ class DatabaseTest {
 		val db = migrationHelper.createDatabase(name, 1).let {
 			migrationHelper.runMigrationsAndValidate(
 					name,
-					7,
+					12,
 					true,
 					*Database_Migrations.build()
 			)

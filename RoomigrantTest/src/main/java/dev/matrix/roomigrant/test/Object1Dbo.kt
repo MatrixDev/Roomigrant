@@ -25,3 +25,4 @@ class Object1Dbo {
     var stringValIndexed: String = ""
 
 }
+
