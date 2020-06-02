@@ -2,6 +2,9 @@ package dev.matrix.roomigrant.compiler.diff
 
 import dev.matrix.roomigrant.compiler.data.Scheme
 import dev.matrix.roomigrant.compiler.data.Table
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 /**
  * @author matrixdev
@@ -18,9 +21,9 @@ class SchemeDiff(val scheme1: Scheme, val scheme2: Scheme) {
 		get() = added.isEmpty() && removed.isEmpty() && changed.isEmpty()
 
 	init {
-		val tables1Map = scheme1.tables.associateByTo(HashMap()) { it.name }
+		val tables1Map = scheme1.tables.associateByTo(HashMap()) { it.name.toLowerCase(Locale.getDefault()) }
 		for (table2 in scheme2.tables) {
-			val table1 = tables1Map.remove(table2.name)
+			val table1 = tables1Map.remove(table2.name.toLowerCase(Locale.getDefault()))
 			if (table1 == null) {
 				added.add(TableDiff(null, table2))
 				continue

@@ -7,10 +7,5 @@ import androidx.room.PrimaryKey
 /**
  * @author matrixdev
  */
-@Entity
-class Object2Dbo {
-
-	@PrimaryKey
-	var id = ""
-
-}
+@Entity(tableName = "Object2DBO")
+data class Object2Dbo(@PrimaryKey var id: String = "")

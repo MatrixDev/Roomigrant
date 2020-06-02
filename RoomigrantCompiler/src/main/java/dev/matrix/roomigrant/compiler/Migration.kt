@@ -88,7 +88,7 @@ class Migration(
                     sb.setLength(sb.length - 1)
                     execSql(sb.toString())
                 }
-            } else if (tableDiff.fieldsDiff.wasChanged) {
+            } else if (tableDiff.fieldsDiff.wasChanged || tableDiff.nameChanged) {
                 val tableMerge = Table(table2, table2.name + mergeTableSuffix)
                 createTable(tableMerge)
 
@@ -131,9 +131,9 @@ class Migration(
                 renameTable(tableMerge.name, table2.name)
             }
 
-			tableDiff.indicesDiff.added.forEach {
-				createTableIndex(table2, it)
-			}
+            tableDiff.indicesDiff.added.forEach {
+                createTableIndex(table2, it)
+            }
             tableDiff.indicesDiff.removed.forEach {
                 dropTableIndex(it)
             }
