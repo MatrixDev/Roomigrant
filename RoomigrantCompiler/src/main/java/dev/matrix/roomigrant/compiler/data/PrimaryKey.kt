@@ -1,13 +1,15 @@
 package dev.matrix.roomigrant.compiler.data
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  * @author matrixdev
  */
+@JsonClass(generateAdapter = true)
 data class PrimaryKey(
-		@SerializedName("autoGenerate")
+		@Json(name ="autoGenerate")
 		val autoGenerate: Boolean,
 
-		@SerializedName("columnNames")
+		@Json(name ="columnNames")
 		val columnNames: List<String>)
