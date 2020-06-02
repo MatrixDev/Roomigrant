@@ -17,4 +17,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.9.2'
+
+    compileOnly 'com.google.auto.service:auto-service:1.0-rc6'
+    compileOnly 'net.ltgt.gradle.incap:incap:0.2'
+    kapt 'net.ltgt.gradle.incap:incap-processor:0.2'
 }
