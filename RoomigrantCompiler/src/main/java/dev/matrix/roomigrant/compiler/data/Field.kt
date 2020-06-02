@@ -1,21 +1,23 @@
 package dev.matrix.roomigrant.compiler.data
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  * @author matrixdev
  */
+@JsonClass(generateAdapter = true)
 data class Field(
-		@SerializedName("fieldPath")
+		@Json(name ="fieldPath")
 		val fieldPath: String,
 
-		@SerializedName("columnName")
+		@Json(name ="columnName")
 		val name: String,
 
-		@SerializedName("affinity")
+		@Json(name ="affinity")
 		val affinity: String,
 
-		@SerializedName("notNull")
+		@Json(name ="notNull")
 		val notNull: Boolean) {
 
 	val defaultSqlValue: String
