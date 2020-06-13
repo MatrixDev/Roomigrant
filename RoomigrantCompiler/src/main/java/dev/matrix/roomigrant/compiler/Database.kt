@@ -16,8 +16,8 @@ import javax.tools.StandardLocation
 @Suppress("UNCHECKED_CAST", "MemberVisibilityCanBePrivate", "FunctionName")
 class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 
-	val migrationType = ClassName("android.arch.persistence.room.migration", "Migration")
-	val sqLiteDatabaseType = ClassName("android.arch.persistence.db", "SupportSQLiteDatabase")
+	val migrationType = ClassName("androidx.room.migration", "Migration")
+	val sqLiteDatabaseType = ClassName("androidx.sqlite.db", "SupportSQLiteDatabase")
 	val migrationListType = ParameterizedTypeName.get(ArrayList::class.asClassName(), migrationType)
 	val migrationArrayType = ParameterizedTypeName.get(ClassName("kotlin", "Array"), migrationType)
 

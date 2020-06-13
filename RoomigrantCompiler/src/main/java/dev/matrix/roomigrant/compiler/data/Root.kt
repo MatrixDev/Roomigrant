@@ -1,14 +1,16 @@
 package dev.matrix.roomigrant.compiler.data
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  * @author matrixdev
  */
+@JsonClass(generateAdapter = true)
 data class Root(
-		@SerializedName("formatVersion")
+		@Json(name ="formatVersion")
 		val formatVersion: Int,
 
-		@SerializedName("database")
+		@Json(name ="database")
 		val scheme: Scheme
 )

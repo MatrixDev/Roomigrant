@@ -1,22 +1,24 @@
 package dev.matrix.roomigrant.compiler.data
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  * @author matrixdev
  */
+@JsonClass(generateAdapter = true)
 data class Index(
-		@SerializedName("name")
-		val name: String,
+        @Json(name = "name")
+        val name: String,
 
-		@SerializedName("unique")
-		val unique: Boolean,
+        @Json(name = "unique")
+        val unique: Boolean,
 
-		@SerializedName("createSql")
-		val createSqlTemplate: String,
+        @Json(name = "createSql")
+        val createSqlTemplate: String,
 
-		@SerializedName("columnNames")
-		val columns: List<String>) {
+        @Json(name = "columnNames")
+        val columns: List<String>) {
 
 	fun createSql(tableName: String) = createSqlTemplate.replace("\${TABLE_NAME}", tableName)
 

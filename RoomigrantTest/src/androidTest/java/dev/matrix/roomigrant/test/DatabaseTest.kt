@@ -1,10 +1,9 @@
 package dev.matrix.roomigrant.test
 
-import android.arch.persistence.room.testing.MigrationTestHelper
-import android.support.test.InstrumentationRegistry
+import androidx.room.testing.MigrationTestHelper
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
 import org.junit.Test
-import android.arch.persistence.room.Database as DatabaseAnnotation
 
 /**
  * @author matrixdev
@@ -20,7 +19,7 @@ class DatabaseTest {
 	fun testMigration() {
 		val name = "migration_test.db"
 		val db = migrationHelper.createDatabase(name, 1).let {
-			migrationHelper.runMigrationsAndValidate(name, 6, true, *Database_Migrations.build())
+			migrationHelper.runMigrationsAndValidate(name, 8, true, *Database_Migrations.build())
 		}
 		db.close()
 	}

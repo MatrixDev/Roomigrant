@@ -1,7 +1,7 @@
 package dev.matrix.roomigrant.compiler
 
-import com.google.gson.Gson
 import com.squareup.kotlinpoet.asClassName
+import com.squareup.moshi.Moshi
 import dev.matrix.roomigrant.GenerateRoomMigrations
 import dev.matrix.roomigrant.compiler.data.Root
 import java.io.File
@@ -10,7 +10,7 @@ import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
-import android.arch.persistence.room.Database as DatabaseAnnotation
+import androidx.room.Database as DatabaseAnnotation
 
 /**
  * @author matrixdev
@@ -19,6 +19,8 @@ class Processor : AbstractProcessor() {
 
 	override fun getSupportedSourceVersion() = SourceVersion.latestSupported()!!
 	override fun getSupportedAnnotationTypes() = mutableSetOf(GenerateRoomMigrations::class.java.name)
+
+	private val moshi = Moshi.Builder().build()
 
 	override fun process(annotations: MutableSet<out TypeElement>, roundEnvironment: RoundEnvironment): Boolean {
 		val schemaLocation = processingEnv.options["room.schemaLocation"] ?: return true
@@ -48,11 +50,11 @@ class Processor : AbstractProcessor() {
 		database.generate()
 	}
 
-	private fun readScheme(file: File) = try {
-		InputStreamReader(file.inputStream()).use {
-			Gson().fromJson(it, Root::class.java).scheme
-		}
-	} catch (e: Exception) {
-		null
-	}
+    private fun readScheme(file: File) = try {
+        InputStreamReader(file.inputStream()).use {
+			moshi.adapter(Root::class.java).fromJson(it.readText())?.scheme
+        }
+    } catch (e: Exception) {
+        null
+    }
 }

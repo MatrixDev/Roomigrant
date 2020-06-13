@@ -1,10 +1,7 @@
 package dev.matrix.roomigrant.compiler
 
 import com.squareup.kotlinpoet.*
-import dev.matrix.roomigrant.compiler.data.Field
-import dev.matrix.roomigrant.compiler.data.Index
-import dev.matrix.roomigrant.compiler.data.Scheme
-import dev.matrix.roomigrant.compiler.data.Table
+import dev.matrix.roomigrant.compiler.data.*
 import dev.matrix.roomigrant.compiler.diff.SchemeDiff
 import dev.matrix.roomigrant.compiler.rules.FieldRule
 import java.util.*
@@ -65,12 +62,12 @@ class Migration(
 		var variableIndex = 0
 		val diff = SchemeDiff(scheme1, scheme2)
 
-		for (tableDiff in diff.added) {
+		for (tableDiff in diff.addedTables) {
 			createTable(tableDiff.table2)
 			createTableIndices(tableDiff.table2)
 		}
 
-		for (tableDiff in diff.changed) {
+		for (tableDiff in diff.changedTables) {
 			val table1 = tableDiff.table1
 			val table2 = tableDiff.table2
 
@@ -144,10 +141,26 @@ class Migration(
 			}
 		}
 
-		for (table in diff.removed) {
-			dropTable(table.name)
-		}
-	}
+        for (table in diff.removedTables) {
+            dropTable(table.name)
+        }
+
+        for (viewDiff in diff.addedViews) {
+            createView(viewDiff.new)
+        }
+
+        for (viewDiff in diff.changedViews) {
+            val old = viewDiff.old
+            val new = viewDiff.new
+
+            old?.name?.let { dropView(it)}
+            createView(new)
+        }
+
+        for (view in diff.removedViews) {
+            dropView(view.name)
+        }
+    }
 
 	private fun getFieldRule(table: Table, field: Field): FieldRule? {
 		return state.rules.getFieldRule(scheme1.version, scheme2.version, table.name, field.name)
@@ -169,9 +182,21 @@ class Migration(
 		execSql(table.createSql(table.name))
 	}
 
-	private fun dropTableIndex(index: Index) {
-		execSql("DROP INDEX IF EXISTS ${index.name}")
-	}
+    private fun dropView(viewName: String) {
+        execSql("DROP VIEW IF EXISTS `$viewName`")
+    }
+
+    private fun renameView(viewName1: String, viewName2: String) {
+        execSql("ALTER VIEW `$viewName1` RENAME TO `$viewName2`")
+    }
+
+    private fun createView(view: View) {
+        execSql(view.createSql(view.name))
+    }
+
+    private fun dropTableIndex(index: Index) {
+        execSql("DROP INDEX IF EXISTS ${index.name}")
+    }
 
 	private fun createTableIndices(table: Table) {
 		table.indices.forEach { createTableIndex(table, it) }
