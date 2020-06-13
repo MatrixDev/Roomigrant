@@ -50,13 +50,13 @@ class Migration(
 				.addFunction(funcSpecBuilder.build())
 				.build()
 
-		fileSpec = FileSpec.builder(state.packageName, className.simpleName())
+		fileSpec = FileSpec.builder(state.packageName, className.simpleName)
 				.addType(typeSpec)
 				.build()
 	}
 
 	fun generate() {
-		state.environment.filer.createResource(StandardLocation.SOURCE_OUTPUT, state.packageName, "${className.simpleName()}.kt")
+		state.environment.filer.createResource(StandardLocation.SOURCE_OUTPUT, state.packageName, "${className.simpleName}.kt")
 				.openWriter()
 				.use { fileSpec.writeTo(it) }
 	}

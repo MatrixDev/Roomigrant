@@ -1,6 +1,7 @@
 package dev.matrix.roomigrant.compiler
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import dev.matrix.roomigrant.compiler.data.Scheme
 import dev.matrix.roomigrant.compiler.rules.Rules
 import dev.matrix.roomigrant.model.IndexInfo
@@ -13,16 +14,16 @@ import javax.tools.StandardLocation
 /**
  * @author matrixdev
  */
-@Suppress("UNCHECKED_CAST", "MemberVisibilityCanBePrivate", "FunctionName")
+@Suppress("UNCHECKED_CAST", "MemberVisibilityCanBePrivate", "FunctionName", "DEPRECATION")
 class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 
 	val migrationType = ClassName("android.arch.persistence.room.migration", "Migration")
 	val sqLiteDatabaseType = ClassName("android.arch.persistence.db", "SupportSQLiteDatabase")
-	val migrationListType = ParameterizedTypeName.get(ArrayList::class.asClassName(), migrationType)
-	val migrationArrayType = ParameterizedTypeName.get(ClassName("kotlin", "Array"), migrationType)
+	val migrationListType = ArrayList::class.asClassName().parameterizedBy(migrationType)
+	val migrationArrayType = ClassName("kotlin", "Array").parameterizedBy(migrationType)
 
-	val packageName = element.asClassName().packageName()
-	val elementClassName = element.asClassName().simpleName()
+	val packageName = element.asClassName().packageName
+	val elementClassName = element.asClassName().simpleName
 	val migrationListClassName = ClassName(packageName, "${elementClassName}_Migrations")
 
 	val rules = Rules(this, element)
@@ -43,11 +44,11 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 				.addFunction(generate_build())
 				.addFunction(generate_buildScheme())
 
-		val fileSpec = FileSpec.builder(packageName, migrationListClassName.simpleName())
+		val fileSpec = FileSpec.builder(packageName, migrationListClassName.simpleName)
 				.addType(typeSpec.build())
 				.build()
 
-		environment.filer.createResource(StandardLocation.SOURCE_OUTPUT, packageName, "${migrationListClassName.simpleName()}.kt")
+		environment.filer.createResource(StandardLocation.SOURCE_OUTPUT, packageName, "${migrationListClassName.simpleName}.kt")
 				.openWriter()
 				.use { fileSpec.writeTo(it) }
 	}
@@ -69,12 +70,12 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 
 	private fun generate_buildScheme(): FunSpec {
 		val code = FunSpec.builder("buildScheme")
-				.returns(ParameterizedTypeName.get(Map::class, Int::class, SchemeInfo::class))
+				.returns(Map::class.parameterizedBy(Int::class, SchemeInfo::class))
 
 		var varIndex = 0
 
 		val schemesVar = "schemes"
-		val schemesType = ParameterizedTypeName.get(HashMap::class, Int::class, SchemeInfo::class)
+		val schemesType = HashMap::class.parameterizedBy(Int::class, SchemeInfo::class)
 		code.addStatement("val %L = %T()", schemesVar, schemesType)
 
 		val schemeVar = "scheme"
@@ -82,7 +83,7 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 		code.addStatement("var %L: %T", schemeVar, schemeType)
 
 		val tablesVar = "tables"
-		val tablesType = ParameterizedTypeName.get(HashMap::class, String::class, TableInfo::class)
+		val tablesType = HashMap::class.parameterizedBy(String::class, TableInfo::class)
 		code.addStatement("var %L: %T", tablesVar, tablesType)
 
 		val tableVar = "table"
@@ -90,7 +91,7 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 		code.addStatement("var %L: %T", tableVar, tableType)
 
 		val indicesVar = "indices"
-		val indicesType = ParameterizedTypeName.get(HashMap::class, String::class, IndexInfo::class)
+		val indicesType = HashMap::class.parameterizedBy(String::class, IndexInfo::class)
 		code.addStatement("var %L: %T", indicesVar, indicesType)
 
 		for (scheme in schemes) {
