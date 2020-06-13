@@ -37,20 +37,26 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 		return Migration(this, database1, database2).also { migrations.add(it) }
 	}
 
-	fun generate() {
-		val typeSpec = TypeSpec.objectBuilder(migrationListClassName)
-				.addProperties(generate_rules())
-				.addFunction(generate_build())
-				.addFunction(generate_buildScheme())
+    fun generate() {
 
-		val fileSpec = FileSpec.builder(packageName, migrationListClassName.simpleName())
-				.addType(typeSpec.build())
-				.build()
+        val typeSpec = TypeSpec.objectBuilder(migrationListClassName)
+                .addProperties(generate_rules())
+                .addFunction(generate_build())
+                .addFunction(generate_buildScheme())
+                .apply {
+                    for (funSpec in generate_buildSchemeInfo()) {
+                        addFunction(funSpec)
+                    }
+                }
 
-		environment.filer.createResource(StandardLocation.SOURCE_OUTPUT, packageName, "${migrationListClassName.simpleName()}.kt")
-				.openWriter()
-				.use { fileSpec.writeTo(it) }
-	}
+        val fileSpec = FileSpec.builder(packageName, migrationListClassName.simpleName())
+                .addType(typeSpec.build())
+                .build()
+
+        environment.filer.createResource(StandardLocation.SOURCE_OUTPUT, packageName, "${migrationListClassName.simpleName()}.kt")
+                .openWriter()
+                .use { fileSpec.writeTo(it) }
+    }
 
 	private fun generate_rules() = rules.getProvidersFields().map {
 		PropertySpec.builder(it.name, it.type)
@@ -67,51 +73,67 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 		return funcSpec.build()
 	}
 
-	private fun generate_buildScheme(): FunSpec {
-		val code = FunSpec.builder("buildScheme")
-				.returns(ParameterizedTypeName.get(Map::class, Int::class, SchemeInfo::class))
+    private fun generate_buildScheme(): FunSpec {
+        val code = FunSpec.builder("buildScheme")
+                .returns(ParameterizedTypeName.get(Map::class, Int::class, SchemeInfo::class))
 
-		var varIndex = 0
+        val schemesMap = "schemesMap"
+        val schemesType = ParameterizedTypeName.get(HashMap::class, Int::class, SchemeInfo::class)
+        code.addStatement("val %L = %T()", schemesMap, schemesType)
 
-		val schemesVar = "schemes"
-		val schemesType = ParameterizedTypeName.get(HashMap::class, Int::class, SchemeInfo::class)
-		code.addStatement("val %L = %T()", schemesVar, schemesType)
+        for (scheme in schemes) {
 
-		val schemeVar = "scheme"
-		val schemeType = SchemeInfo::class
-		code.addStatement("var %L: %T", schemeVar, schemeType)
+            val funName = "buildSchemeInfo_${scheme.version}"
 
-		val tablesVar = "tables"
-		val tablesType = ParameterizedTypeName.get(HashMap::class, String::class, TableInfo::class)
-		code.addStatement("var %L: %T", tablesVar, tablesType)
+            code.addStatement("%L.put(%L, %L())", schemesMap, scheme.version, funName)
+        }
 
-		val tableVar = "table"
-		val tableType = TableInfo::class
-		code.addStatement("var %L: %T", tableVar, tableType)
+        code.addStatement("return %L", schemesMap)
 
-		val indicesVar = "indices"
-		val indicesType = ParameterizedTypeName.get(HashMap::class, String::class, IndexInfo::class)
-		code.addStatement("var %L: %T", indicesVar, indicesType)
+        return code.build()
+    }
 
-		for (scheme in schemes) {
-			code.addStatement("%L = %T()", tablesVar, tablesType)
-			code.addStatement("%L = %T(%L, %L)", schemeVar, SchemeInfo::class, scheme.version, tablesVar)
-			code.addStatement("%L.put(%L, %L)", schemesVar, scheme.version, schemeVar)
+    private fun generate_buildSchemeInfo(): List<FunSpec> {
 
-			for (table in scheme.tables) {
-				code.addStatement("%L = %T()", indicesVar, indicesType)
-				code.addStatement("%L = %T(%L, %S, %S, %L)", tableVar, TableInfo::class, schemeVar, table.name, table.createSql(), indicesVar)
-				code.addStatement("%L.put(%S, %L)", tablesVar, table.name, tableVar)
+        val schemeInfo = "schemeInfo"
+        val tablesMap = "tables"
+        val tablesType =  ParameterizedTypeName.get(HashMap::class, String::class, TableInfo::class)
+        val indicesType = ParameterizedTypeName.get(HashMap::class, String::class, IndexInfo::class)
 
-				for (index in table.indices) {
-					code.addStatement("%L.put(%S, %T(%L, %S, %S))", indicesVar, index.name, IndexInfo::class, tableVar, index.name, index.createSql(table.name))
-				}
-			}
-		}
+        return schemes.map { scheme ->
+            val funName = "buildSchemeInfo_${scheme.version}"
 
-		code.addStatement("return %L", schemesVar)
+            val code = FunSpec.builder(funName)
+                    .addModifiers(KModifier.PRIVATE)
+                    .returns(SchemeInfo::class)
 
-		return code.build()
-	}
+            code.addStatement("val %L = %T()", tablesMap, tablesType)
+            code.addStatement("val %L = %T(%L, %L)", schemeInfo, SchemeInfo::class, scheme.version, tablesMap)
+
+            code.addStatement("")
+
+            for (table in scheme.tables) {
+
+                val tableInfo = "tableInfo_${table.name}"
+                val indices = "indices_${table.name}"
+
+                code.addStatement("val %L = %T()", indices, indicesType)
+                code.addStatement("")
+
+                code.addStatement("val %L = %T(%L, %S, %S, %L)", tableInfo, TableInfo::class, schemeInfo, table.name, table.createSql(), indices)
+                code.addStatement("%L.put(%S, %L)", tablesMap, table.name, tableInfo)
+                code.addStatement("")
+
+                for (index in table.indices) {
+                    code.addStatement("%L.put(%S, %T(%L, %S, %S))", indices, index.name, IndexInfo::class, tableInfo, index.name, index.createSql(table.name))
+                }
+                code.addStatement("")
+            }
+
+            code.addStatement("return %L", schemeInfo)
+
+            code.build()
+        }
+    }
 
 }
