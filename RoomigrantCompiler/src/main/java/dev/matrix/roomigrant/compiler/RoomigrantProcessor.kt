@@ -1,13 +1,18 @@
 package dev.matrix.roomigrant.compiler
 
+import com.google.auto.service.AutoService
 import com.google.gson.Gson
 import com.squareup.kotlinpoet.asClassName
 import dev.matrix.roomigrant.GenerateRoomMigrations
 import dev.matrix.roomigrant.compiler.data.Root
+import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
+import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType.ISOLATING
 import java.io.File
 import java.io.InputStreamReader
 import javax.annotation.processing.AbstractProcessor
+import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
+import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import android.arch.persistence.room.Database as DatabaseAnnotation
@@ -15,7 +20,10 @@ import android.arch.persistence.room.Database as DatabaseAnnotation
 /**
  * @author matrixdev
  */
-class Processor : AbstractProcessor() {
+@AutoService(Processor::class)
+@IncrementalAnnotationProcessor(ISOLATING)
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
+class RoomigrantProcessor : AbstractProcessor() {
 
 	override fun getSupportedSourceVersion() = SourceVersion.latestSupported()!!
 	override fun getSupportedAnnotationTypes() = mutableSetOf(GenerateRoomMigrations::class.java.name)
