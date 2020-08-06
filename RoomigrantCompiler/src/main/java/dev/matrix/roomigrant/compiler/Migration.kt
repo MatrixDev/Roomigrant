@@ -71,6 +71,8 @@ class Migration(
             val table1 = tableDiff.old
             val table2 = tableDiff.new
 
+            var tableCreated = false
+
             if (!tableDiff.primaryKeyChanged && tableDiff.fieldsDiff.onlyAdded) {
                 val sb = StringBuilder()
                 for (field in tableDiff.fieldsDiff.added) {
@@ -85,7 +87,11 @@ class Migration(
                     sb.setLength(sb.length - 1)
                     execSql(sb.toString())
                 }
+
             } else if (tableDiff.fieldsDiff.wasChanged || tableDiff.nameChanged) {
+
+                tableCreated = true
+
                 val tableMerge = Table(table2, table2.name + mergeTableSuffix)
                 createTable(tableMerge)
 
@@ -132,14 +138,20 @@ class Migration(
                 tableDiff.indicesDiff.added.forEach {
                     createTableIndex(table2, it)
                 }
-            } else {
+            }
 
-                tableDiff.indicesDiff.removed.forEach {
-                    dropTableIndex(it)
-                }
-                tableDiff.indicesDiff.added.forEach {
+            tableDiff.indicesDiff.removed.forEach {
+                dropTableIndex(it)
+            }
+
+            if (tableCreated) {
+                tableDiff.indicesDiff.same.forEach {
                     createTableIndex(table2, it)
                 }
+            }
+
+            tableDiff.indicesDiff.added.forEach {
+                createTableIndex(table2, it)
             }
         }
 

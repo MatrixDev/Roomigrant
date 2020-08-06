@@ -12,10 +12,9 @@ class IndicesDiff(val old: Table?, val new: Table) {
     val same = ArrayList<Index>()
     val added = ArrayList<Index>()
     val removed = ArrayList<Index>()
-    val changed = ArrayList<Index>()
 
     val wasChanged: Boolean
-        get() = added.isNotEmpty() || removed.isNotEmpty() || changed.isNotEmpty()
+        get() = added.isNotEmpty() || removed.isNotEmpty()
 
     init {
         init()
@@ -48,7 +47,10 @@ class IndicesDiff(val old: Table?, val new: Table) {
             when (oldIndex) {
                 null -> added.add(newIndex)
                 newIndex -> same.add(newIndex)
-                else -> changed.add(newIndex)
+                else -> {
+                    added.add(newIndex)
+                    removed.add(oldIndex)
+                }
             }
         }
         removed.addAll(oldIndicesNameMap.values)
