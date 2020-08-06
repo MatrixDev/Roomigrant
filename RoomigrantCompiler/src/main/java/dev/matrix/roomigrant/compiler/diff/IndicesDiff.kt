@@ -9,34 +9,51 @@ import dev.matrix.roomigrant.compiler.data.Table
 @Suppress("CanBeParameter", "MemberVisibilityCanBePrivate")
 class IndicesDiff(val old: Table?, val new: Table) {
 
-	val same = ArrayList<Index>()
-	val added = ArrayList<Index>()
-	val removed = ArrayList<Index>()
-	val changed = ArrayList<Index>()
+    val same = ArrayList<Index>()
+    val added = ArrayList<Index>()
+    val removed = ArrayList<Index>()
+    val changed = ArrayList<Index>()
 
-	val wasChanged: Boolean
-		get() = added.isNotEmpty() || removed.isNotEmpty() || changed.isNotEmpty()
+    val wasChanged: Boolean
+        get() = added.isNotEmpty() || removed.isNotEmpty() || changed.isNotEmpty()
 
-	init {
-		init()
-	}
+    init {
+        init()
+    }
 
-	fun init() {
-		if (old == null) {
-			added.addAll(new.indices)
-			return
-		}
+    fun init() {
+        if (old == null) {
+            added.addAll(new.indices)
+            return
+        }
 
-		val indexes1Map = old.indices.associateByTo(HashMap()) { it.name }
-		for (index2 in new.indices) {
-			val index1 = indexes1Map.remove(index2.name)
-			when (index1) {
-				null -> added.add(index2)
-				index2 -> same.add(index2)
-				else -> changed.add(index2)
-			}
-		}
-		removed.addAll(indexes1Map.values)
-	}
+        val oldIndicesNameMap = old.indices.associateByTo(mutableMapOf()) {
+
+            it.columns.sorted().map { columnName ->
+                val field = old.fieldsMap[columnName] ?: error("unable to find field $columnName")
+                IndexColumnAffinity(field.name, field.affinity, field.notNull)
+            }
+        }
+
+        for (newIndex in new.indices) {
+
+            val pairs = newIndex.columns.sorted().map { columnName ->
+                val field  = new.fieldsMap[columnName] ?: error("unable to find field $columnName")
+
+                 IndexColumnAffinity(field.name, field.affinity, field.notNull)
+            }
+
+            val oldIndex = oldIndicesNameMap.remove(pairs)
+
+            when (oldIndex) {
+                null -> added.add(newIndex)
+                newIndex -> same.add(newIndex)
+                else -> changed.add(newIndex)
+            }
+        }
+        removed.addAll(oldIndicesNameMap.values)
+    }
+
+    data class IndexColumnAffinity(val name: String, val affinity: String, val notNull: Boolean)
 
 }

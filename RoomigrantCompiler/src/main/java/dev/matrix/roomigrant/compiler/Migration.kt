@@ -128,11 +128,11 @@ class Migration(
                 renameTable(tableMerge.name, table2.name)
             }
 
-            tableDiff.indicesDiff.added.forEach {
-                createTableIndex(table2, it)
-            }
             tableDiff.indicesDiff.removed.forEach {
                 dropTableIndex(it)
+            }
+            tableDiff.indicesDiff.added.forEach {
+                createTableIndex(table2, it)
             }
         }
 
