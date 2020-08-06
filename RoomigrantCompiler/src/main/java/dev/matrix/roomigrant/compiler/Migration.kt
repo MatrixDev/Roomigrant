@@ -124,14 +124,14 @@ class Migration(
                 sb.append(" FROM `").append(table1!!.name).append("`")
 
                 execSql(sb.toString())
+                dropTable(table1.name)
+                renameTable(tableMerge.name, table2.name)
                 tableDiff.indicesDiff.same.forEach {
                     createTableIndex(table2, it)
                 }
                 tableDiff.indicesDiff.added.forEach {
                     createTableIndex(table2, it)
                 }
-                dropTable(table1.name)
-                renameTable(tableMerge.name, table2.name)
             } else {
 
                 tableDiff.indicesDiff.removed.forEach {
