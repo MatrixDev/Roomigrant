@@ -124,15 +124,22 @@ class Migration(
                 sb.append(" FROM `").append(table1!!.name).append("`")
 
                 execSql(sb.toString())
+                tableDiff.indicesDiff.same.forEach {
+                    createTableIndex(table2, it)
+                }
+                tableDiff.indicesDiff.added.forEach {
+                    createTableIndex(table2, it)
+                }
                 dropTable(table1.name)
                 renameTable(tableMerge.name, table2.name)
-            }
+            } else {
 
-            tableDiff.indicesDiff.removed.forEach {
-                dropTableIndex(it)
-            }
-            tableDiff.indicesDiff.added.forEach {
-                createTableIndex(table2, it)
+                tableDiff.indicesDiff.removed.forEach {
+                    dropTableIndex(it)
+                }
+                tableDiff.indicesDiff.added.forEach {
+                    createTableIndex(table2, it)
+                }
             }
         }
 
@@ -148,7 +155,7 @@ class Migration(
             val old = viewDiff.old
             val new = viewDiff.new
 
-            old?.name?.let { dropView(it)}
+            old?.name?.let { dropView(it) }
             createView(new)
         }
 
