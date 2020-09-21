@@ -38,10 +38,10 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Package
-          path: RoomigrantCompiler/build/libs/RoomigrantCompiler.lib
+          path: RoomigrantCompiler/build/libs/RoomigrantCompiler.jar
 
       - name: Packaging RoomigrantLib
         uses: actions/upload-artifact@v2
         with:
           name: Package
-          path: RoomigrantLib/build/libs/RoomigrantLib.lib
+          path: RoomigrantLib/build/libs/RoomigrantLib.jar
