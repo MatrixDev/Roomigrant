@@ -17,8 +17,8 @@ import javax.tools.StandardLocation
 @Suppress("UNCHECKED_CAST", "MemberVisibilityCanBePrivate", "FunctionName", "DEPRECATION")
 class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 
-    val migrationType = ClassName("android.arch.persistence.room.migration", "Migration")
-    val sqLiteDatabaseType = ClassName("android.arch.persistence.db", "SupportSQLiteDatabase")
+    val migrationType = ClassName("androidx.room.migration", "Migration")
+    val sqLiteDatabaseType = ClassName("androidx.sqlite.db", "SupportSQLiteDatabase")
     val migrationListType = ArrayList::class.asClassName().parameterizedBy(migrationType)
     val migrationArrayType = ClassName("kotlin", "Array").parameterizedBy(migrationType)
 
@@ -43,10 +43,9 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
             .addProperties(generate_rules())
             .addFunction(generate_build())
             .addFunction(generate_buildScheme())
-
-        for (scheme in schemes) {
-			typeSpec.addFunction(generate_buildSchemeInfo(scheme))
-        }
+            .also {
+                schemes.forEach { scheme -> it.addFunction(generate_buildSchemeInfo(scheme)) }
+            }
 
         val fileSpec = FileSpec.builder(packageName, migrationListClassName.simpleName)
             .addType(typeSpec.build())

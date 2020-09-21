@@ -23,8 +23,8 @@ Step 2. Add Roomigrant library and compiler dependencies:
 ```groovy
 dependencies {
     // Room
-    implementation 'android.arch.persistence.room:runtime:1.1.1'
-    kapt 'android.arch.persistence.room:compiler:1.1.1'
+    implementation 'androidx.room:room-runtime:2.2.5'
+    kapt 'androidx.room:room-compiler:2.2.5'
 
     // Roomigrant
     implementation 'com.github.MatrixDev.Roomigrant:RoomigrantLib:0.1.7'

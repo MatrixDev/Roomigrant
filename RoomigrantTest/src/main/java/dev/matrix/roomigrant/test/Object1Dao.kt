@@ -1,7 +1,7 @@
 package dev.matrix.roomigrant.test
 
-import android.arch.persistence.room.Dao
-import android.arch.persistence.room.Insert
+import androidx.room.Dao
+import androidx.room.Insert
 
 /**
  * @author matrixdev

@@ -1,6 +1,6 @@
 package dev.matrix.roomigrant.test
 
-import android.arch.persistence.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import dev.matrix.roomigrant.rules.FieldMigrationRule
 import dev.matrix.roomigrant.rules.OnMigrationEndRule
 import dev.matrix.roomigrant.rules.OnMigrationStartRule

@@ -15,11 +15,12 @@ import javax.annotation.processing.RoundEnvironment
 import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
-import android.arch.persistence.room.Database as DatabaseAnnotation
+import androidx.room.Database as DatabaseAnnotation
 
 /**
  * @author matrixdev
  */
+@Suppress("SpellCheckingInspection")
 @AutoService(Processor::class)
 @IncrementalAnnotationProcessor(ISOLATING)
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
@@ -44,7 +45,7 @@ class RoomigrantProcessor : AbstractProcessor() {
 
 	private fun processDatabase(schemaLocation: String, element: TypeElement) {
 		val folder = File(schemaLocation, element.asClassName().toString())
-		val schemes = folder.listFiles().mapNotNull { readScheme(it) }.sortedBy { it.version }
+		val schemes = folder.listFiles().orEmpty().mapNotNull { readScheme(it) }.sortedBy { it.version }
 
 		val database = Database(processingEnv, element)
 		for (scheme in schemes) {
