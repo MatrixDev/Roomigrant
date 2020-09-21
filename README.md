@@ -27,8 +27,8 @@ dependencies {
     kapt 'androidx.room:room-compiler:2.2.5'
 
     // Roomigrant
-    implementation 'com.github.MatrixDev.Roomigrant:RoomigrantLib:0.1.7'
-    kapt 'com.github.MatrixDev.Roomigrant:RoomigrantCompiler:0.1.7'
+    implementation 'com.github.MatrixDev.Roomigrant:RoomigrantLib:0.2.0'
+    kapt 'com.github.MatrixDev.Roomigrant:RoomigrantCompiler:0.2.0'
 }
 ```
 
