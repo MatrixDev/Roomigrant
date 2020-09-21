@@ -10,7 +10,7 @@ group = 'com.github.MatrixDev'
 dependencies {
     implementation project(':RoomigrantLib')
 
-    implementation 'com.squareup:kotlinpoet:0.7.0'
+    implementation 'com.squareup:kotlinpoet:1.6.0'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'android.arch.persistence.room:runtime:1.1.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
