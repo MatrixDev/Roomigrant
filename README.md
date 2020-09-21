@@ -1,6 +1,7 @@
 # Roomigrant
 
 [![Release](https://jitpack.io/v/MatrixDev/Roomigrant.svg)](https://jitpack.io/#MatrixDev/Roomigrant)
+![CI-Build](https://github.com/MatrixDev/Roomigrant/workflows/ci-build/badge.svg)
 
 Roomigrant is a helper library to automatically generate Android Room library migrations using compile-time code generation.
 
