@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: ci-build
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -35,13 +35,13 @@ jobs:
       - run: echo Packaging...
         
       - name: Packaging RoomigrantCompiler
-      - uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v2
         with:
           name: Package
           path: RoomigrantCompiler/build/libs/RoomigrantCompiler.lib
 
       - name: Packaging RoomigrantLib
-      - uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v2
         with:
           name: Package
           path: RoomigrantLib/build/libs/RoomigrantLib.lib
