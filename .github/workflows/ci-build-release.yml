@@ -5,10 +5,13 @@ name: ci-build
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+#  push:
+#    branches: [ master ]
+#  pull_request:
+#    branches: [ master ]
+  release:
+    types:
+      - created
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -27,21 +30,22 @@ jobs:
         with:
           java-version: 1.8
 
-      - run: echo Building...
+#      - name: Building Gradle
+#        run: ./gradlew build
 
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Building & Publishing
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gradle build publish
 
-      - run: echo Packaging...
-        
-      - name: Packaging RoomigrantCompiler
-        uses: actions/upload-artifact@v2
-        with:
-          name: Package
-          path: RoomigrantCompiler/build/libs/RoomigrantCompiler.jar
+#      - name: Packaging RoomigrantCompiler
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Package
+#          path: RoomigrantCompiler/build/libs/RoomigrantCompiler.jar
 
-      - name: Packaging RoomigrantLib
-        uses: actions/upload-artifact@v2
-        with:
-          name: Package
-          path: RoomigrantLib/build/libs/RoomigrantLib.jar
+#      - name: Packaging RoomigrantLib
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Package
+#          path: RoomigrantLib/build/libs/RoomigrantLib.jar
