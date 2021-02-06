@@ -1,13 +1,19 @@
 package dev.matrix.roomigrant.compiler
 
+import com.google.auto.service.AutoService
+import com.google.gson.Gson
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.moshi.Moshi
 import dev.matrix.roomigrant.GenerateRoomMigrations
 import dev.matrix.roomigrant.compiler.data.Root
+import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
+import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType.ISOLATING
 import java.io.File
 import java.io.InputStreamReader
 import javax.annotation.processing.AbstractProcessor
+import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
+import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import androidx.room.Database as DatabaseAnnotation
@@ -15,7 +21,11 @@ import androidx.room.Database as DatabaseAnnotation
 /**
  * @author matrixdev
  */
-class Processor : AbstractProcessor() {
+@Suppress("SpellCheckingInspection")
+@AutoService(Processor::class)
+@IncrementalAnnotationProcessor(ISOLATING)
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
+class RoomigrantProcessor : AbstractProcessor() {
 
 	override fun getSupportedSourceVersion() = SourceVersion.latestSupported()!!
 	override fun getSupportedAnnotationTypes() = mutableSetOf(GenerateRoomMigrations::class.java.name)
@@ -38,7 +48,7 @@ class Processor : AbstractProcessor() {
 
 	private fun processDatabase(schemaLocation: String, element: TypeElement) {
 		val folder = File(schemaLocation, element.asClassName().toString())
-		val schemes = folder.listFiles().mapNotNull { readScheme(it) }.sortedBy { it.version }
+		val schemes = folder.listFiles().orEmpty().mapNotNull { readScheme(it) }.sortedBy { it.version }
 
 		val database = Database(processingEnv, element)
 		for (scheme in schemes) {

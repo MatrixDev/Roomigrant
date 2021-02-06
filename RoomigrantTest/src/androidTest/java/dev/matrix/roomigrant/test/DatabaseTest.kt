@@ -4,6 +4,7 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
 import org.junit.Test
+import androidx.room.Database as DatabaseAnnotation
 
 /**
  * @author matrixdev
