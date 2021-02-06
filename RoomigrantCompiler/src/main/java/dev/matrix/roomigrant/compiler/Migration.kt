@@ -153,7 +153,7 @@ class Migration(
             val old = viewDiff.old
             val new = viewDiff.new
 
-            old?.name?.let { dropView(it)}
+            old?.name?.let { dropView(it) }
             createView(new)
         }
 

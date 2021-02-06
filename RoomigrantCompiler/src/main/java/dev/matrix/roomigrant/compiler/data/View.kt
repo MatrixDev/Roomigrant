@@ -5,10 +5,10 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class View(
-		@Json(name ="viewName")
+		@Json(name = "viewName")
 		val name: String,
 
-		@Json(name ="createSql")
+		@Json(name = "createSql")
 		val createSqlTemplate: String) {
 
 	fun createSql(viewName: String = name) = createSqlTemplate.replace("\${VIEW_NAME}", viewName)
