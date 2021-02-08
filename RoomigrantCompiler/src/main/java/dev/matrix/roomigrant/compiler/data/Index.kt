@@ -20,6 +20,6 @@ data class Index(
         @Json(name = "columnNames")
         val columns: List<String>) {
 
-	fun createSql(tableName: String) = createSqlTemplate.replace("\${TABLE_NAME}", tableName)
+    fun createSql(tableName: String) = createSqlTemplate.replace("\${TABLE_NAME}", tableName)
 
 }

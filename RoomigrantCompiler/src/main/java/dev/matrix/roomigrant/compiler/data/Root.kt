@@ -8,9 +8,9 @@ import com.squareup.moshi.JsonClass
  */
 @JsonClass(generateAdapter = true)
 data class Root(
-		@Json(name ="formatVersion")
+		@Json(name = "formatVersion")
 		val formatVersion: Int,
 
-		@Json(name ="database")
+		@Json(name = "database")
 		val scheme: Scheme
 )

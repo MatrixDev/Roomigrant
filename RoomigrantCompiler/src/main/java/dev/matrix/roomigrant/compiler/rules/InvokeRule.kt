@@ -11,6 +11,6 @@ data class InvokeRule(
 		val field: RulesProviderField,
 		val methodName: String) : RuleByVersion {
 
-	fun getInvokeCode(databaseArgName: String, version1: Int, version2: Int) =
-			CodeBlock.of("%T.%L.%L($databaseArgName, $version1, $version2)", field.database.migrationListClassName, field.name, methodName)
+    fun getInvokeCode(databaseArgName: String, version1: Int, version2: Int) =
+            CodeBlock.of("%T.%L.%L($databaseArgName, $version1, $version2)", field.database.migrationListClassName, field.name, methodName)
 }

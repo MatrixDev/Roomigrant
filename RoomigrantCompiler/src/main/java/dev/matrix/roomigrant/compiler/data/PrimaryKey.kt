@@ -8,8 +8,8 @@ import com.squareup.moshi.JsonClass
  */
 @JsonClass(generateAdapter = true)
 data class PrimaryKey(
-		@Json(name ="autoGenerate")
+		@Json(name = "autoGenerate")
 		val autoGenerate: Boolean,
 
-		@Json(name ="columnNames")
+		@Json(name = "columnNames")
 		val columnNames: List<String>)

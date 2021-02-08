@@ -11,5 +11,5 @@ data class View(
 		@Json(name = "createSql")
 		val createSqlTemplate: String) {
 
-	fun createSql(viewName: String = name) = createSqlTemplate.replace("\${VIEW_NAME}", viewName)
+    fun createSql(viewName: String = name) = createSqlTemplate.replace("\${VIEW_NAME}", viewName)
 }

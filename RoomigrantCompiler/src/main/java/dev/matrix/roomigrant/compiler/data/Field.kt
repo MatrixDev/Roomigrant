@@ -8,45 +8,45 @@ import com.squareup.moshi.JsonClass
  */
 @JsonClass(generateAdapter = true)
 data class Field(
-		@Json(name ="fieldPath")
+		@Json(name = "fieldPath")
 		val fieldPath: String,
 
-		@Json(name ="columnName")
+		@Json(name = "columnName")
 		val name: String,
 
-		@Json(name ="affinity")
+		@Json(name = "affinity")
 		val affinity: String,
 
-		@Json(name ="notNull")
+		@Json(name = "notNull")
 		val notNull: Boolean) {
 
-	val defaultSqlValue: String
-		get() {
-			if (!notNull) {
-				return "NULL"
-			}
-			return when (affinity) {
+    val defaultSqlValue: String
+        get() {
+            if (!notNull) {
+                return "NULL"
+            }
+            return when (affinity) {
 				"INTEGER" -> "0"
 				"REAL" -> "0.0"
-				else -> "''"
-			}
-		}
+                else -> "''"
+            }
+        }
 
-	val definition: String
-		get() {
-			val sb = StringBuilder("`$name` $affinity")
-			if (notNull) {
-				sb.append(" NOT NULL")
-			}
-			return sb.append(" DEFAULT ").append(defaultSqlValue).toString()
-		}
+    val definition: String
+        get() {
+            val sb = StringBuilder("`$name` $affinity")
+            if (notNull) {
+                sb.append(" NOT NULL")
+            }
+            return sb.append(" DEFAULT ").append(defaultSqlValue).toString()
+        }
 
-	override fun hashCode() = name.hashCode()
-	override fun equals(other: Any?): Boolean {
-		return other is Field &&
-				notNull == other.notNull &&
-				affinity == other.affinity &&
-				name == other.name
+    override fun hashCode() = name.hashCode()
+    override fun equals(other: Any?): Boolean {
+        return other is Field &&
+                notNull == other.notNull &&
+                affinity == other.affinity &&
+                name == other.name
 
-	}
+    }
 }

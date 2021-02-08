@@ -40,27 +40,27 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 
     fun generate() {
         val typeSpec = TypeSpec.objectBuilder(migrationListClassName)
-            .addProperties(generate_rules())
-            .addFunction(generate_build())
-            .addFunction(generate_buildScheme())
-            .also {
-                schemes.forEach { scheme -> it.addFunction(generate_buildSchemeInfo(scheme)) }
-            }
+                .addProperties(generate_rules())
+                .addFunction(generate_build())
+                .addFunction(generate_buildScheme())
+                .also {
+                    schemes.forEach { scheme -> it.addFunction(generate_buildSchemeInfo(scheme)) }
+                }
 
         val fileSpec = FileSpec.builder(packageName, migrationListClassName.simpleName)
-            .addType(typeSpec.build())
-            .build()
+                .addType(typeSpec.build())
+                .build()
 
         val fileName = "${migrationListClassName.simpleName}.kt"
         environment.filer.createResource(StandardLocation.SOURCE_OUTPUT, packageName, fileName)
-            .openWriter()
-            .use { fileSpec.writeTo(it) }
+                .openWriter()
+                .use { fileSpec.writeTo(it) }
     }
 
     private fun generate_rules() = rules.getProvidersFields().map {
         PropertySpec.builder(it.name, it.type)
-            .initializer("%T()", it.type)
-            .build()
+                .initializer("%T()", it.type)
+                .build()
     }
 
     private fun generate_build(): FunSpec {
@@ -74,7 +74,7 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 
     private fun generate_buildScheme(): FunSpec {
         val code = FunSpec.builder("buildScheme")
-			.returns(Map::class.parameterizedBy(Int::class, SchemeInfo::class))
+                .returns(Map::class.parameterizedBy(Int::class, SchemeInfo::class))
 
         val schemesMap = "schemesMap"
         val schemesType = HashMap::class.parameterizedBy(Int::class, SchemeInfo::class)
@@ -90,39 +90,39 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
         return code.build()
     }
 
-	private fun generate_buildSchemeInfo(scheme: Scheme): FunSpec {
-		val code = FunSpec.builder("buildSchemeInfo_${scheme.version}")
-			.addModifiers(KModifier.PRIVATE)
-			.returns(SchemeInfo::class)
+    private fun generate_buildSchemeInfo(scheme: Scheme): FunSpec {
+        val code = FunSpec.builder("buildSchemeInfo_${scheme.version}")
+                .addModifiers(KModifier.PRIVATE)
+                .returns(SchemeInfo::class)
 
-		val tablesMap = "tables"
-		val tablesType =  HashMap::class.parameterizedBy(String::class, TableInfo::class)
-		code.addStatement("val %L = %T()", tablesMap, tablesType)
+        val tablesMap = "tables"
+        val tablesType = HashMap::class.parameterizedBy(String::class, TableInfo::class)
+        code.addStatement("val %L = %T()", tablesMap, tablesType)
 
-		val schemeInfo = "schemeInfo"
-		code.addStatement("val %L = %T(%L, %L)", schemeInfo, SchemeInfo::class, scheme.version, tablesMap)
+        val schemeInfo = "schemeInfo"
+        code.addStatement("val %L = %T(%L, %L)", schemeInfo, SchemeInfo::class, scheme.version, tablesMap)
 
-		code.addStatement("")
+        code.addStatement("")
 
-		for (table in scheme.tables) {
-			val tableInfo = "tableInfo_${table.name}"
-			val indices = "indices_${table.name}"
+        for (table in scheme.tables) {
+            val tableInfo = "tableInfo_${table.name}"
+            val indices = "indices_${table.name}"
 
-			val indicesType = HashMap::class.parameterizedBy(String::class, IndexInfo::class)
-			code.addStatement("val %L = %T()", indices, indicesType)
-			code.addStatement("")
+            val indicesType = HashMap::class.parameterizedBy(String::class, IndexInfo::class)
+            code.addStatement("val %L = %T()", indices, indicesType)
+            code.addStatement("")
 
-			code.addStatement("val %L = %T(%L, %S, %S, %L)", tableInfo, TableInfo::class, schemeInfo, table.name, table.createSql(), indices)
-			code.addStatement("%L.put(%S, %L)", tablesMap, table.name, tableInfo)
-			code.addStatement("")
+            code.addStatement("val %L = %T(%L, %S, %S, %L)", tableInfo, TableInfo::class, schemeInfo, table.name, table.createSql(), indices)
+            code.addStatement("%L.put(%S, %L)", tablesMap, table.name, tableInfo)
+            code.addStatement("")
 
-			for (index in table.indices) {
-				code.addStatement("%L.put(%S, %T(%L, %S, %S))", indices, index.name, IndexInfo::class, tableInfo, index.name, index.createSql(table.name))
-			}
-		}
+            for (index in table.indices) {
+                code.addStatement("%L.put(%S, %T(%L, %S, %S))", indices, index.name, IndexInfo::class, tableInfo, index.name, index.createSql(table.name))
+            }
+        }
 
-		code.addStatement("return %L", schemeInfo)
+        code.addStatement("return %L", schemeInfo)
 
-		return code.build()
-	}
+        return code.build()
+    }
 }
