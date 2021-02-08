@@ -13,23 +13,24 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     // Kotlin code generation
-    implementation('com.squareup:kotlinpoet:1.6.0') {
+    implementation('com.squareup:kotlinpoet:1.7.2') {
         exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
     }
 
     // Room
-    implementation 'androidx.room:room-runtime:2.2.5'
+    implementation 'androidx.room:room-runtime:2.2.6'
 
     // Json parsing
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.squareup.moshi:moshi-kotlin:1.11.0'
+    kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.11.0'
 
     // Auto META-INF processor info generator
     //noinspection AnnotationProcessorOnCompilePath
     compileOnly 'com.google.auto.service:auto-service:1.0-rc6'
 
     // Incremental processor support
-    compileOnly 'net.ltgt.gradle.incap:incap:0.2'
-    kapt 'net.ltgt.gradle.incap:incap-processor:0.2'
+    compileOnly 'net.ltgt.gradle.incap:incap:0.3'
+    kapt 'net.ltgt.gradle.incap:incap-processor:0.3'
 }
 
 publishing {

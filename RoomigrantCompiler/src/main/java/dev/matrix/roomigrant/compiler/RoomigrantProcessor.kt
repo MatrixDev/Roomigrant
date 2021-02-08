@@ -1,8 +1,7 @@
 package dev.matrix.roomigrant.compiler
 
 import com.google.auto.service.AutoService
-import com.google.gson.Gson
-import com.squareup.kotlinpoet.asClassName
+import com.squareup.moshi.Moshi
 import dev.matrix.roomigrant.GenerateRoomMigrations
 import dev.matrix.roomigrant.compiler.data.Root
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
@@ -26,42 +25,45 @@ import androidx.room.Database as DatabaseAnnotation
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 class RoomigrantProcessor : AbstractProcessor() {
 
-	override fun getSupportedSourceVersion() = SourceVersion.latestSupported()!!
-	override fun getSupportedAnnotationTypes() = mutableSetOf(GenerateRoomMigrations::class.java.name)
+    override fun getSupportedSourceVersion() = SourceVersion.latestSupported()!!
+    override fun getSupportedAnnotationTypes() = mutableSetOf(GenerateRoomMigrations::class.java.name)
 
-	override fun process(annotations: MutableSet<out TypeElement>, roundEnvironment: RoundEnvironment): Boolean {
-		val schemaLocation = processingEnv.options["room.schemaLocation"] ?: return true
-		val elements = roundEnvironment.getElementsAnnotatedWith(GenerateRoomMigrations::class.java)
-				.filterIsInstance<TypeElement>()
+    private val moshi = Moshi.Builder().build()
 
-		for (element in elements) {
-			if (element.getAnnotation(DatabaseAnnotation::class.java) == null) {
-				throw Exception("$element is not annotated with ${DatabaseAnnotation::class.simpleName}")
-			}
-			processDatabase(schemaLocation, element)
-		}
-		return true
-	}
+    override fun process(annotations: MutableSet<out TypeElement>, roundEnvironment: RoundEnvironment): Boolean {
+        val schemaLocation = processingEnv.options["room.schemaLocation"] ?: return true
+        val elements = roundEnvironment.getElementsAnnotatedWith(GenerateRoomMigrations::class.java)
+                .filterIsInstance<TypeElement>()
 
-	private fun processDatabase(schemaLocation: String, element: TypeElement) {
-		val folder = File(schemaLocation, element.asClassName().toString())
-		val schemes = folder.listFiles().orEmpty().mapNotNull { readScheme(it) }.sortedBy { it.version }
+        for (element in elements) {
+            if (element.getAnnotation(DatabaseAnnotation::class.java) == null) {
+                throw Exception("$element is not annotated with ${DatabaseAnnotation::class.simpleName}")
+            }
+            processDatabase(schemaLocation, element)
+        }
+        return true
+    }
 
-		val database = Database(processingEnv, element)
-		for (scheme in schemes) {
-			database.addScheme(scheme)
-		}
-		for (index in 1 until schemes.size) {
-			database.addMigration(schemes[index - 1], schemes[index]).generate()
-		}
-		database.generate()
-	}
+    private fun processDatabase(schemaLocation: String, element: TypeElement) {
 
-	private fun readScheme(file: File) = try {
-		InputStreamReader(file.inputStream()).use {
-			Gson().fromJson(it, Root::class.java).scheme
-		}
-	} catch (e: Exception) {
-		null
-	}
+        val folder = File(schemaLocation, element.qualifiedName.toString())
+        val schemes = folder.listFiles().orEmpty().mapNotNull { readScheme(it) }.sortedBy { it.version }
+
+        val database = Database(processingEnv, element)
+        for (scheme in schemes) {
+            database.addScheme(scheme)
+        }
+        for (index in 1 until schemes.size) {
+            database.addMigration(schemes[index - 1], schemes[index]).generate()
+        }
+        database.generate()
+    }
+
+    private fun readScheme(file: File) = try {
+        InputStreamReader(file.inputStream()).use {
+            moshi.adapter(Root::class.java).fromJson(it.readText())?.scheme
+        }
+    } catch (e: Exception) {
+        null
+    }
 }
