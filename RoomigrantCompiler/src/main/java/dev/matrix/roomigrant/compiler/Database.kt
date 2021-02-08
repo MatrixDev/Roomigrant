@@ -104,21 +104,29 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
 
         code.addStatement("")
 
+
+        val tableInfo = "tableInfo"
+        val tableInfoType = TableInfo::class
+        code.addStatement("var %L: %T", tableInfo, tableInfoType)
+
+        val indices = "indices"
+        val indicesType = HashMap::class.parameterizedBy(String::class, IndexInfo::class)
+        code.addStatement("var %L: %T", indices, indicesType)
+
+        code.addStatement("")
+
         for (table in scheme.tables) {
-            val tableInfo = "tableInfo_${table.name}"
-            val indices = "indices_${table.name}"
+            code.addComment("Table %S", table.name)
 
-            val indicesType = HashMap::class.parameterizedBy(String::class, IndexInfo::class)
-            code.addStatement("val %L = %T()", indices, indicesType)
-            code.addStatement("")
-
-            code.addStatement("val %L = %T(%L, %S, %S, %L)", tableInfo, TableInfo::class, schemeInfo, table.name, table.createSql(), indices)
-            code.addStatement("%L.put(%S, %L)", tablesMap, table.name, tableInfo)
-            code.addStatement("")
-
+            code.addStatement("%L = %T()", indices, indicesType)
             for (index in table.indices) {
-                code.addStatement("%L.put(%S, %T(%L, %S, %S))", indices, index.name, IndexInfo::class, tableInfo, index.name, index.createSql(table.name))
+                code.addStatement("%L[%S] = %T(%L, %S, %S)", indices, index.name, IndexInfo::class, tableInfo, index.name, index.createSql(table.name))
             }
+
+            code.addStatement("%L = %T(%L, %S, %S, %L)", tableInfo, tableInfoType, schemeInfo, table.name, table.createSql(), indices)
+            code.addStatement("%L[%S] = %L", tablesMap, table.name, tableInfo)
+
+            code.addStatement("")
         }
 
         code.addStatement("return %L", schemeInfo)

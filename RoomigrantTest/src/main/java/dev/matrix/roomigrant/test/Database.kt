@@ -7,12 +7,13 @@ import dev.matrix.roomigrant.GenerateRoomMigrations
 /**
  * @author matrixdev
  *
- * 7  - Add ObjectDboView
- * 8  - Add twoId to ObjectDboView
+ * 7 - Add ObjectDboView
+ * 8 - Add twoId to ObjectDboView
+ * 9 - Special characters, indices
  */
 @Database(
-        version = 8,
-        entities = [Object1Dbo::class, Object2Dbo::class],
+        version = 9,
+        entities = [Object1Dbo::class, Object2Dbo::class, SpecialCharsDbo::class, IndicesDbo::class],
         views = [ObjectDboView::class]
 )
 @GenerateRoomMigrations(Rules::class)
