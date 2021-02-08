@@ -2,7 +2,7 @@
 
 buildscript {
     ext.kotlin_version = '1.4.10'
-    ext.roomigrant_version = '0.2.0'
+    ext.roomigrant_version = '0.3.1'
 
     repositories {
         google()
