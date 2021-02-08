@@ -27,16 +27,33 @@ class IndicesDiff(val table1: Table?, val table2: Table) {
             return
         }
 
-        val indexes1Map = table1.indices.associateByTo(HashMap()) { it.name }
-        for (index2 in table2.indices) {
-            val index1 = indexes1Map.remove(index2.name)
-            when (index1) {
-				null -> added.add(index2)
-				index2 -> same.add(index2)
-                else -> changed.add(index2)
-            }
-        }
-        removed.addAll(indexes1Map.values)
-    }
+        val oldIndicesNameMap = table1.indices.associateByTo(mutableMapOf()) {
+
+			it.columns.sorted().map { columnName ->
+				val field = table1.fieldsMap[columnName] ?: error("unable to find field $columnName")
+				IndexColumnAffinity(field.name, field.affinity, field.notNull)
+			}
+		}
+
+		for (newIndex in table2.indices) {
+
+			val pairs = newIndex.columns.sorted().map { columnName ->
+				val field = table2.fieldsMap[columnName] ?: error("unable to find field $columnName")
+
+				IndexColumnAffinity(field.name, field.affinity, field.notNull)
+			}
+
+			val oldIndex = oldIndicesNameMap.remove(pairs)
+
+			when (oldIndex) {
+                null -> added.add(newIndex)
+                newIndex -> same.add(newIndex)
+				else     -> changed.add(newIndex)
+			}
+		}
+		removed.addAll(oldIndicesNameMap.values)
+	}
+
+	data class IndexColumnAffinity(val name: String, val affinity: String, val notNull: Boolean)
 
 }
