@@ -135,11 +135,11 @@ class Migration(
             }
             tableDiff.indicesDiff.removed.forEach {
                 dropTableIndex(it)
-			}
-			tableDiff.indicesDiff.added.forEach {
+            }
+            tableDiff.indicesDiff.added.forEach {
                 createTableIndex(table2, it)
-			}
-		}
+            }
+        }
 
         for (table in diff.removedTables) {
             dropTable(table.name)
