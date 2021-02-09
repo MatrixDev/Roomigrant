@@ -19,7 +19,7 @@ class DatabaseTest {
     fun testMigration() {
         val name = "migration_test.db"
         val db = migrationHelper.createDatabase(name, 1).let {
-            migrationHelper.runMigrationsAndValidate(name, 8, true, *Database_Migrations.build())
+            migrationHelper.runMigrationsAndValidate(name, 10, true, *Database_Migrations.build())
         }
         db.close()
     }

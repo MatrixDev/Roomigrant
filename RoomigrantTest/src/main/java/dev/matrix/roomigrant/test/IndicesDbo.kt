@@ -10,5 +10,5 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "indices", indices = [Index(name = "id_index", value = ["id"])])
 class IndicesDbo {
     @PrimaryKey
-    var id = ""
+    var id = 1
 }

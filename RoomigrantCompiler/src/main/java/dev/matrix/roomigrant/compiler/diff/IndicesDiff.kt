@@ -9,6 +9,9 @@ import dev.matrix.roomigrant.compiler.data.Table
 @Suppress("CanBeParameter", "MemberVisibilityCanBePrivate")
 class IndicesDiff(val table1: Table?, val table2: Table) {
 
+    private data class IndexIdentity(val fields: Set<IndexFieldIdentity>)
+    private data class IndexFieldIdentity(val name: String, val affinity: String, val notNull: Boolean)
+
     val same = ArrayList<Index>()
     val added = ArrayList<Index>()
     val removed = ArrayList<Index>()
@@ -27,16 +30,32 @@ class IndicesDiff(val table1: Table?, val table2: Table) {
             return
         }
 
-        val indexes1Map = table1.indices.associateByTo(HashMap()) { it.name }
-        for (index2 in table2.indices) {
-            val index1 = indexes1Map.remove(index2.name)
-            when (index1) {
-				null -> added.add(index2)
-				index2 -> same.add(index2)
-                else -> changed.add(index2)
+        val oldIndicesMap = table1.indices.associateByTo(HashMap()) {
+            buildIndexIdentity(table1, it)
+        }
+
+        for (newIndex in table2.indices) {
+            val newIndexIdentity = buildIndexIdentity(table2, newIndex)
+            when (oldIndicesMap.remove(newIndexIdentity)) {
+                null -> added.add(newIndex)
+                newIndex -> same.add(newIndex)
+                else -> changed.add(newIndex)
             }
         }
-        removed.addAll(indexes1Map.values)
+        removed.addAll(oldIndicesMap.values)
     }
 
+    private fun buildIndexIdentity(table: Table, index: Index): IndexIdentity {
+        val fields = index.columns.mapTo(HashSet()) {
+            buildIndexFieldIdentity(table, it)
+        }
+        return IndexIdentity(fields = fields)
+    }
+
+    private fun buildIndexFieldIdentity(table: Table, columnName: String): IndexFieldIdentity {
+        val field = checkNotNull(table.fieldsMap[columnName]) {
+            "unable to find field ${table.name}.$columnName"
+        }
+        return IndexFieldIdentity(field.name, field.affinity, field.notNull)
+    }
 }

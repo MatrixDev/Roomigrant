@@ -10,9 +10,10 @@ import dev.matrix.roomigrant.GenerateRoomMigrations
  * 7 - Add ObjectDboView
  * 8 - Add twoId to ObjectDboView
  * 9 - Special characters, indices
+ * 10 - Change Indices indexed ID from String to Int
  */
 @Database(
-        version = 9,
+        version = 10,
         entities = [Object1Dbo::class, Object2Dbo::class, SpecialCharsDbo::class, IndicesDbo::class],
         views = [ObjectDboView::class]
 )
