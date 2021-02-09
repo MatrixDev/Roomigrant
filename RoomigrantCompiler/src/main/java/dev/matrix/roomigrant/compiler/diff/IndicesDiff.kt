@@ -9,7 +9,8 @@ import dev.matrix.roomigrant.compiler.data.Table
 @Suppress("CanBeParameter", "MemberVisibilityCanBePrivate")
 class IndicesDiff(val table1: Table?, val table2: Table) {
 
-    data class IndexColumnAffinity(val name: String, val affinity: String, val notNull: Boolean)
+    private data class IndexIdentity(val fields: Set<IndexFieldIdentity>)
+    private data class IndexFieldIdentity(val name: String, val affinity: String, val notNull: Boolean)
 
     val same = ArrayList<Index>()
     val added = ArrayList<Index>()
@@ -29,26 +30,32 @@ class IndicesDiff(val table1: Table?, val table2: Table) {
             return
         }
 
-        val oldIndicesNameMap = table1.indices.associateByTo(HashMap()) {
-            it.columns.sorted().map { columnName ->
-                val field = table1.fieldsMap[columnName] ?: error("unable to find field $columnName")
-                IndexColumnAffinity(field.name, field.affinity, field.notNull)
-            }
+        val oldIndicesMap = table1.indices.associateByTo(HashMap()) {
+            buildIndexIdentity(table1, it)
         }
 
         for (newIndex in table2.indices) {
-            val pairs = newIndex.columns.sorted().map { columnName ->
-                val field = table2.fieldsMap[columnName] ?: error("unable to find field $columnName")
-                IndexColumnAffinity(field.name, field.affinity, field.notNull)
-            }
-
-            val oldIndex = oldIndicesNameMap.remove(pairs)
-            when (oldIndex) {
+            val newIndexIdentity = buildIndexIdentity(table2, newIndex)
+            when (oldIndicesMap.remove(newIndexIdentity)) {
                 null -> added.add(newIndex)
                 newIndex -> same.add(newIndex)
                 else -> changed.add(newIndex)
             }
         }
-        removed.addAll(oldIndicesNameMap.values)
+        removed.addAll(oldIndicesMap.values)
+    }
+
+    private fun buildIndexIdentity(table: Table, index: Index): IndexIdentity {
+        val fields = index.columns.mapTo(HashSet()) {
+            buildIndexFieldIdentity(table, it)
+        }
+        return IndexIdentity(fields = fields)
+    }
+
+    private fun buildIndexFieldIdentity(table: Table, columnName: String): IndexFieldIdentity {
+        val field = checkNotNull(table.fieldsMap[columnName]) {
+            "unable to find field ${table.name}.$columnName"
+        }
+        return IndexFieldIdentity(field.name, field.affinity, field.notNull)
     }
 }
