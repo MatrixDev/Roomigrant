@@ -123,7 +123,7 @@ class Migration(
                 sb.setLength(sb.length - 1)
                 sb.append(" FROM `").append(table1!!.name).append("`")
 
-                execSql(sb.toString())
+                execSql(sb.toString(), "%P")
                 dropTable(table1.name)
                 renameTable(tableMerge.name, table2.name)
                 createTableIndices(table2)
@@ -166,8 +166,8 @@ class Migration(
         return state.rules.getFieldRule(scheme1.version, scheme2.version, table.name, field.name)
     }
 
-    private fun execSql(query: String) {
-        funcSpecBuilder.addStatement("%N.execSQL(%S)", databaseArgName, query)
+    private fun execSql(query: String, placeholder: String = "%S") {
+        funcSpecBuilder.addStatement("%N.execSQL($placeholder)", databaseArgName, query)
     }
 
     private fun dropTable(tableName: String) {
