@@ -119,12 +119,12 @@ class Database(val environment: ProcessingEnvironment, element: TypeElement) {
             code.addComment("Table %S", table.name)
 
             code.addStatement("%L = %T()", indices, indicesType)
-            for (index in table.indices) {
-                code.addStatement("%L[%S] = %T(%L, %S, %S)", indices, index.name, IndexInfo::class, tableInfo, index.name, index.createSql(table.name))
-            }
-
             code.addStatement("%L = %T(%L, %S, %S, %L)", tableInfo, tableInfoType, schemeInfo, table.name, table.createSql(), indices)
-            code.addStatement("%L[%S] = %L", tablesMap, table.name, tableInfo)
+
+            code.addStatement("%L.put(%S, %L)", tablesMap, table.name, tableInfo)
+            for (index in table.indices) {
+                code.addStatement("%L.put(%S, %T(%L, %S, %S))", indices, index.name, IndexInfo::class, tableInfo, index.name, index.createSql(table.name))
+            }
 
             code.addStatement("")
         }
