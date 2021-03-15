@@ -167,7 +167,7 @@ class Migration(
     }
 
     private fun execSql(query: String) {
-        funcSpecBuilder.addStatement("%N.execSQL(%S)", databaseArgName, query)
+        funcSpecBuilder.addStatement("%N.execSQL(%P)", databaseArgName, query)
     }
 
     private fun dropTable(tableName: String) {
