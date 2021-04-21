@@ -129,6 +129,10 @@ fun migrate_1_2_after(db: SupportSQLiteDatabase, version1: Int, version2: Int) {
 }
 ```
 
+# Warning
+
+Please be careful when changing existing tables - be sure to increment database version before doing so. Otherwise wrong schema will be updated by the Room library and, in result, generated migrations will not be valid.
+
 # Todos
 
  - Add views support
